@@ -1,22 +1,13 @@
 # Roadmap
 
-## Current focus
+This roadmap covers public-facing guide and user-surface work only.
+
+## Current Priorities
 
 - Keep Snake stable and responsive across desktop and touch devices.
-- Keep the hub fast, quiet, and easy to scan.
-- Keep the main portfolio boundary intact until public launch work is intentional.
+- Promote planned game slots only when they become playable public entries.
+- Refresh public docs and screenshots through the publish workflow.
 
-## Planned game slots
+## Documentation Rule
 
-- Minesweeper
-- Pong
-- Tiles
-- Orbit
-- 2048
-
-## Before broader launch
-
-- Review search indexing behavior.
-- Add only intentional links from dylanwlim.com.
-- Verify the production domain and deployment health.
-- Refresh these public guides when user-visible game behavior changes.
+When a user-visible public flow changes, update the matching guide page and changelog entry in the same source-repo pass. The daily workflow will still refresh the homepage screenshot, but guide text should describe only behavior that is actually available to public users.

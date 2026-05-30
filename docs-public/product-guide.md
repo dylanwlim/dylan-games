@@ -1,30 +1,23 @@
 # Product Guide
 
-## Home hub
+Use this page as the practical user manual for the public surface that is available now.
 
-The home page opens directly into the game hub. It presents available and planned games from the registry and starts with Snake selected.
+## Main Flow
 
-## Snake
+1. Open the public hub and choose Play Snake.
+2. Use arrow keys or the on-screen controls to move.
+3. Use New Game to restart and All games to browse the current launcher entries.
 
-Snake is the current playable game.
+## Current Actions
 
-- Use keyboard controls on desktop.
-- Use touch-friendly controls on mobile and tablets.
-- Choose speed settings before or during play where supported.
-- Keep track of the local best score in the browser.
+| Area | Current public flow |
+| --- | --- |
+| Play Snake | Use Play Snake, New Game, keyboard controls, or on-screen directional controls. |
+| Browse the launcher | Use All games to view Snake and the planned game slots. |
+| Track the current public set | Use the public docs changelog and roadmap to see what changed. |
 
-## Planned games
+## Notes For Use
 
-The hub includes finished placeholder states for games that are not playable yet. These entries make the roadmap visible without implying that unfinished games are ready.
-
-Current planned slots:
-
-- Minesweeper
-- Pong
-- Tiles
-- Orbit
-- 2048
-
-## Soft launch
-
-The hub is available at its production domain, but it is not meant to be broadly promoted from dylanwlim.com until launch copy, links, and search behavior are explicitly updated.
+- Hub shell: The homepage opens directly into the game launcher with Snake selected.
+- Playable starter: Snake is the current playable browser game.
+- Planned slots: The launcher shows future games as planned entries instead of playable games.

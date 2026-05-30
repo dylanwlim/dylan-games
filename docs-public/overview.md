@@ -1,20 +1,21 @@
 # Overview
 
-Dylan Games is a small browser-games hub for polished, fast-loading games that run in the browser. The first playable game is Snake, with several future game slots reserved for later releases.
+Dylan Games is a browser-games hub at games.dylanwlim.com. The current public play path is Snake, with a launcher that also shows planned slots for future games.
 
-## What it offers
+## Public Surface
 
-- A clean hub at games.dylanwlim.com.
-- A playable Snake game with keyboard controls, touch controls, speed settings, and local best score.
-- Finished placeholder states for planned games so the hub can stay stable while new games are built.
-- A soft-launch boundary that keeps the games hub separate from the main portfolio site until public launch work is intentional.
+The public hub is live with Snake, New Game, keyboard/on-screen controls, and an All games launcher.
 
-## Current status
+## Current Public Actions
 
-- Snake is playable.
-- Minesweeper, Pong, Tiles, Orbit, and 2048 are planned placeholders.
-- The site intentionally uses noindex and robots blocking during soft launch.
+| Area | Current public flow |
+| --- | --- |
+| Play Snake | Use Play Snake, New Game, keyboard controls, or on-screen directional controls. |
+| Browse the launcher | Use All games to view Snake and the planned game slots. |
+| Track the current public set | Use the public docs changelog and roadmap to see what changed. |
 
-## Where to start
+## Best First Step
 
-Use the [product guide](product-guide.md) for the user-facing flow, then read [how it works](how-it-works.md) for the technical model.
+1. Open the public hub and choose Play Snake.
+2. Use arrow keys or the on-screen controls to move.
+3. Use New Game to restart and All games to browse the current launcher entries.

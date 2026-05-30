@@ -1,19 +1,23 @@
-# Access and Updates
+# Access And Updates
 
-## Access
+## Public Entry Points
 
-The current production URL is [https://games.dylanwlim.com](https://games.dylanwlim.com).
+- Public site: [https://games.dylanwlim.com](https://games.dylanwlim.com)
+- Public discussions: [https://github.com/dylanwlim/dylan-games-docs/discussions](https://github.com/dylanwlim/dylan-games-docs/discussions)
 
-The hub is in soft launch. It is intentionally separate from dylanwlim.com until public launch work is reviewed.
+## Current Use
 
-## Updates
+1. Open the public hub and choose Play Snake.
+2. Use arrow keys or the on-screen controls to move.
+3. Use New Game to restart and All games to browse the current launcher entries.
 
-Public guide updates are mirrored to the public docs repository after docs changes land on the source repository main branch. A scheduled daily sync checks whether the public docs repository needs to be refreshed.
+## How These Docs Stay Current
+
+- Source guide files live under `docs-public/`.
+- The publish workflow runs after main-branch updates, by manual dispatch, and once per day.
+- The workflow captures a fresh homepage screenshot before publishing.
+- The workflow publishes only the approved guide files and homepage screenshot asset.
 
 ## Feedback
 
-Open a GitHub Discussion in the public docs repository with:
-
-- the guide page name,
-- the unclear or stale section,
-- the expected correction or question.
+Open a Discussion with the guide page name, the unclear section, and the public behavior you expected the guide to describe.

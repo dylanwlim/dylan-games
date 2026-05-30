@@ -1,37 +1,30 @@
-# Build and Run
+# Access Guide
 
-## Requirements
+## Open The Public Surface
 
-- Node.js 24
-- npm
-- Chromium browser dependencies for Playwright end-to-end checks
+- Public site: [https://games.dylanwlim.com](https://games.dylanwlim.com)
+- Discussions: [https://github.com/dylanwlim/dylan-games-docs/discussions](https://github.com/dylanwlim/dylan-games-docs/discussions)
 
-## Install
+## Use The Current Flow
+
+1. Open the public hub and choose Play Snake.
+2. Use arrow keys or the on-screen controls to move.
+3. Use New Game to restart and All games to browse the current launcher entries.
+
+## Current Availability
+
+The public hub is live with Snake, New Game, keyboard/on-screen controls, and an All games launcher.
+
+## Source Development
+
+The source repository is public at [https://github.com/dylanwlim/dylan-games](https://github.com/dylanwlim/dylan-games).
 
 ```bash
 npm ci
-```
-
-## Run locally
-
-```bash
 npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-## Validate
-
-```bash
 npm run validate
 ```
 
-The validation suite checks formatting, linting, TypeScript, unit tests, production build, and Playwright smoke tests.
+## Automated Public Docs
 
-## Deployment commands
-
-```bash
-npm run deploy:preview
-npm run deploy:production
-npm run verify:deployment -- https://games.dylanwlim.com
-```
+The publish workflow runs on main-branch updates, manual dispatch, and a daily schedule. It refreshes `assets/homepage.png`, validates the public guide set, and publishes the files to the public docs repository.

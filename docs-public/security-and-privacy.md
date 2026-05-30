@@ -1,17 +1,13 @@
-# Security and Privacy
+# Security And Privacy
 
-## User guidance
+## Public Discussion Guidance
 
-- Do not post passwords, credentials, payment details, personal records, portfolio holdings, recordings, or customer data in Discussions.
-- Report suspicious behavior with the page, browser, device, and steps needed to reproduce the issue.
-- Verify time-sensitive or account-critical information through the appropriate official channel.
+- Do not post credentials, personal records, or payment details in public Discussions.
+- Scores and game state shown in the current public hub are browser-local user experience details.
+- Use Discussions for public guide feedback and reproducible public game behavior.
 
-## Current app boundary
+## Safe Reporting
 
-- The current hub has no sign-in system.
-- The current hub has no server-side game account storage.
-- Scores and settings for the playable starter game are local to the browser.
-
-## Reporting
-
-Use GitHub Discussions for public documentation questions and non-urgent guide fixes. For security-sensitive reports, avoid posting exploit details publicly.
+- Keep public reports focused on reproducible public behavior and guide clarity.
+- Do not post exploit details, credentials, account-specific records, or payment data in public threads.
+- Use the public contact, booking, support, or official app path when a question involves an account, appointment, health, financial, production, or business-critical detail.

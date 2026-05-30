@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "docs-public/**"
-      - ".github/workflows/publish-public-docs.yml"
   workflow_dispatch:
   schedule:
     - cron: "31 9 * * *"
@@ -20,11 +17,12 @@ concurrency:
 
 env:
   PUBLIC_DOCS_REPO: dylanwlim/dylan-games-docs
+  PUBLIC_DOCS_HOMEPAGE_URL: "https://games.dylanwlim.com"
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Check out source repository
         uses: actions/checkout@v4
@@ -38,22 +36,35 @@ jobs:
             exit 1
           fi
 
+      - name: Capture public homepage screenshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs-public/assets
+          npx --yes playwright@1.57.0 install --with-deps chromium
+          npx --yes playwright@1.57.0 screenshot --wait-for-timeout=2500 --viewport-size=1440,900 "${PUBLIC_DOCS_HOMEPAGE_URL}" docs-public/assets/homepage.png
+
       - name: Validate docs allowlist and leak check
         shell: bash
         run: |
           set -euo pipefail
 
-          for required in "README.md" "overview.md" "product-guide.md" "how-it-works.md" "build-and-run.md" "roadmap.md" "changelog.md" "security-and-privacy.md" "setup.md"; do
+          for required in "README.md" "overview.md" "product-guide.md" "how-it-works.md" "build-and-run.md" "roadmap.md" "changelog.md" "security-and-privacy.md" "setup.md" "assets/homepage.png"; do
             if [ ! -f "docs-public/${required}" ]; then
               echo "::error::Missing docs-public/${required}"
               exit 1
             fi
           done
 
+          if [ ! -s docs-public/assets/homepage.png ]; then
+            echo "::error::Homepage screenshot is empty."
+            exit 1
+          fi
+
           while IFS= read -r file; do
             rel="${file#docs-public/}"
             case "${rel}" in
-              README\.md|overview\.md|product-guide\.md|how-it-works\.md|build-and-run\.md|roadmap\.md|changelog\.md|security-and-privacy\.md|setup\.md)
+              README.md|overview.md|product-guide.md|how-it-works.md|build-and-run.md|roadmap.md|changelog.md|security-and-privacy.md|setup.md|assets/homepage.png)
                 ;;
               *)
                 echo "::error::Unexpected public docs file: ${rel}"
@@ -62,12 +73,12 @@ jobs:
             esac
           done < <(find docs-public -type f | sort)
 
-          if find docs-public -type f ! -name "*.md" -print -quit | grep -q .; then
-            echo "::error::docs-public may contain Markdown files only."
+          if find docs-public -type f ! \( -name "*.md" -o -path "docs-public/assets/homepage.png" \) -print -quit | grep -q .; then
+            echo "::error::docs-public may contain Markdown files plus assets/homepage.png only."
             exit 1
           fi
 
-          if grep -RInE '(gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+|sk-[A-Za-z0-9]{20,}|BEGIN (RSA|OPENSSH|PRIVATE)|DATABASE_URL=|PAYLOAD_SECRET=|SUPABASE_[A-Z0-9_]+=|RESEND_[A-Z0-9_]+=|CONTACT_[A-Z0-9_]+=|GOOGLE_[A-Z0-9_]+=|E2E_ADMIN_[A-Z0-9_]+=|CLOUDFLARE_[A-Z0-9_]+=|VERCEL_[A-Z0-9_]+=|OPENAI_[A-Z0-9_]+=|AUTH_SECRET=|JWT_SECRET=|nothing sensitive|nothing private|no sensitive data|no private data)' docs-public; then
+          if grep -RInE --include='*.md' '(gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+|sk-[A-Za-z0-9]{20,}|BEGIN (RSA|OPENSSH|PRIVATE)|DATABASE_URL=|PAYLOAD_SECRET=|SUPABASE_[A-Z0-9_]+=|RESEND_[A-Z0-9_]+=|CONTACT_[A-Z0-9_]+=|GOOGLE_[A-Z0-9_]+=|E2E_ADMIN_[A-Z0-9_]+=|CLOUDFLARE_[A-Z0-9_]+=|VERCEL_[A-Z0-9_]+=|OPENAI_[A-Z0-9_]+=|AUTH_SECRET=|JWT_SECRET=|nothing sensitive|nothing private|no sensitive data|no private data)' docs-public; then
             echo "::error::Potential secret or unsafe public-docs disclosure phrase found in docs-public."
             exit 1
           fi

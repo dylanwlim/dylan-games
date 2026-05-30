@@ -2,10 +2,18 @@
 
 ## 2026-05-30
 
-- Created the public guide set for Dylan Games.
-- Added overview, product guide, technology notes, build/run notes, roadmap, changelog, and security/privacy guidance.
-- Added daily guide sync support for the public docs repository.
+- Refreshed the public docs around the current public Dylan Games surface.
+- Added a current homepage screenshot to the README.
+- Updated the publish workflow so homepage screenshots refresh on main-branch updates and the daily sync.
+- Tightened the public guide language to focus on actions users can access now.
 
-## Update policy
+## 2026-05-22
 
-Changelog entries summarize user-visible guide and product-access changes. Product behavior can move faster than written docs; use [Discussions](https://github.com/dylanwlim/dylan-games-docs/discussions) when a page needs an update.
+- Created the guide repository for Dylan Games.
+- Added overview, product guide, technology notes, access/run notes, roadmap, changelog, and security/privacy guidance.
+- Enabled Discussions for access questions and guide feedback.
+- Added daily guide sync support.
+
+## Update Policy
+
+Changelog entries summarize user-visible public guide and access changes. If a page looks stale, open a Discussion with the page name and the section that needs attention.
