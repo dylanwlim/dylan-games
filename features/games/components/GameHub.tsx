@@ -306,7 +306,7 @@ function GamesView({
             src={feature.image}
             alt={`${feature.gameTitle} feature artwork`}
             fill
-            priority={featureIndex === 0}
+            loading="eager"
             sizes="(max-width: 900px) 100vw, calc(100vw - 380px)"
             className="feature-image"
           />
@@ -316,7 +316,7 @@ function GamesView({
             <h2>{feature.title}</h2>
             <div className="feature-app-card">
               <span className="feature-icon" aria-hidden="true">
-                <Image src={feature.image} alt="" fill sizes="42px" />
+                <Image src={feature.image} alt="" fill loading="eager" sizes="42px" />
               </span>
               <span className="feature-app-copy">
                 <strong>{feature.gameTitle}</strong>

@@ -22,6 +22,11 @@ that changes or verifies the project.
   `team_bbLoVoshgKMbjGs5UhmJM5kZ`, added `games.dylanwlim.com`, created the
   Cloudflare DNS-only `A` record for `games` -> `76.76.21.21`, and verified the
   production domain with `npm run verify:deployment -- https://games.dylanwlim.com`.
+- 2026-05-30: Reworked the UI to match the supplied Apple Arcade-style
+  reference: sidebar-first app shell, `Games` title, `Discover` page, genre
+  pages, genre chips, screenshot-matched feature banner, `dylanwlim.com`
+  profile link, generated game artwork, and a Discover parallax surface based on
+  the supplied pasted component text.
 
 ## Current Product Boundary
 
