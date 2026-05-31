@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-05-31
+
+- Paused automatic public-docs publishing from main-branch updates and the daily schedule.
+- Kept manual publish workflow support for reviewed public-docs refreshes.
+
 ## 2026-05-30
 
 - Refreshed the public docs around the current public Dylan Games surface.

@@ -14,9 +14,9 @@
 ## How These Docs Stay Current
 
 - Source guide files live under `docs-public/`.
-- The publish workflow runs after main-branch updates, by manual dispatch, and once per day.
-- The workflow captures a fresh homepage screenshot before publishing.
-- The workflow publishes only the approved guide files and homepage screenshot asset.
+- Public docs publishing is manual while automatic publishing is paused.
+- Each refresh should capture a current homepage screenshot before publishing.
+- Publishing uses only the approved guide files and homepage screenshot asset.
 
 ## Feedback
 
