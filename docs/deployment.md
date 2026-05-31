@@ -9,7 +9,8 @@
 
 ## Vercel Settings
 
-The checked-in `vercel.json` pins the expected Vercel settings:
+The checked-in `vercel.json` pins the expected Vercel settings, and Vercel
+project inspect currently reports the same values:
 
 - Framework: Next.js
 - Install command: `npm ci`
@@ -42,7 +43,8 @@ npm run verify:deployment -- https://games.dylanwlim.com
 The verification script checks the response, app shell content, noindex
 metadata, and robots behavior.
 
-The current verified production deployment is
-`dpl_7x9McVjNta9pfSkAjz53iYYR3bzm`, aliased to
-`https://games.dylanwlim.com`. The latest verified preview deployment is
-`dpl_ES6A9dUYv8Pem5NmFmQ1AWviZFYC`.
+Use this command for the active production deployment id:
+
+```bash
+vercel inspect https://games.dylanwlim.com --scope dylans-projects-73251aac
+```

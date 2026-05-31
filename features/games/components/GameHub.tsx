@@ -462,7 +462,7 @@ function GamesView({
             src={feature.image}
             alt={`${feature.gameTitle} feature artwork`}
             fill
-            loading="eager"
+            preload
             sizes="(max-width: 900px) 100vw, calc(100vw - 380px)"
             className="feature-image"
           />
@@ -702,7 +702,7 @@ function ContinuePlayingSection() {
       <div className="continue-grid">
         <ContinueCard
           game={snake}
-          image="/art/feature-dylan-games.png"
+          image="/art/discover-action.png"
           actionIcon={VolumeX}
           summary="Classic movement, tight controls."
         />

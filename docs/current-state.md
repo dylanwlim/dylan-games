@@ -6,6 +6,11 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-05-31: Added the Apple Arcade-style storefront below the genre chips,
+  expanded the registry with additional coming-soon games, switched the site
+  icon/favicon mark to the sports trophy, added Motion-backed page/list
+  animation, and verified the Vercel project framework blocker is resolved:
+  project inspect now reports `Next.js` instead of `Other`/`null`.
 - 2026-05-30: Updated the hub shell with a closed-by-default full-height
   sidebar drawer, removed the decorative traffic-light dots, added
   `/games/favorites`, and gave Discover plus genre routes a shared
@@ -42,12 +47,11 @@ that changes or verifies the project.
 ## Current Deployment
 
 - Production: `https://games.dylanwlim.com`
-- Vercel production deployment:
-  `dpl_7x9McVjNta9pfSkAjz53iYYR3bzm`
-  (`dylan-games-cbync7c6u-dylans-projects-73251aac.vercel.app`)
-- Latest preview deployment:
-  `dpl_ES6A9dUYv8Pem5NmFmQ1AWviZFYC`
-  (`dylan-games-8r58gg3dm-dylans-projects-73251aac.vercel.app`)
+- Vercel project: `dylan-games`
+  (`prj_cgKDdPzQttp7ubHyaBuYRRXVHX0m`)
+- Vercel framework preset: `Next.js`
 - Direct Vercel preview URLs may require Vercel authentication because
   deployment protection is enabled; the custom production domain is publicly
   reachable and verified.
+- Inspect the active production deployment id with
+  `vercel inspect https://games.dylanwlim.com --scope dylans-projects-73251aac`.
