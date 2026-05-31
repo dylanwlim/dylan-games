@@ -5,7 +5,6 @@ import { gameGenres, getGenreBySlug, type GenreSlug } from "@/features/games/gen
 import { games, getGameBySlug } from "@/features/games/game-registry";
 import { SnakeGame } from "@/features/games/snake/SnakeGame";
 import type { GameDefinition } from "@/features/games/types";
-import { siteConfig } from "@/lib/site";
 import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -221,7 +220,7 @@ function Sidebar({
 
       <a className="sidebar-profile" href="https://dylanwlim.com" rel="noreferrer">
         <span className="profile-mark" aria-hidden="true">
-          <img src="/icons/dylan-games-mark.svg" alt="" />
+          <Image src="/icons/dylan-games-mark.svg" alt="" width={28} height={28} />
         </span>
         <span>dylanwlim.com</span>
       </a>

@@ -27,6 +27,11 @@ jobs:
       - name: Check out source repository
         uses: actions/checkout@v6
 
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+
       - name: Fail closed when publish credential is missing
         env:
           DOCS_CREDENTIAL: ${{ secrets.PUBLIC_DOCS_REPO_TOKEN }}
