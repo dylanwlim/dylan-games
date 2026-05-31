@@ -200,7 +200,7 @@ function Sidebar({
           active={activeView !== "discover" && !activeGenre}
         />
         <SidebarLink
-          href="/discover"
+          href={"/discover" as Route}
           icon={Star}
           label="Discover"
           active={activeView === "discover"}
