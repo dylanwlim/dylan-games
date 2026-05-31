@@ -260,7 +260,7 @@ export function GameHub({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.16, ease: "easeOut" }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
               />
               <Sidebar
                 activeView={view}
@@ -315,10 +315,19 @@ function Sidebar({
       initial={{ x: "-102%" }}
       animate={{ x: 0 }}
       exit={{ x: "-102%" }}
-      transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="sidebar-topbar">
-        <span>Dylan Games</span>
+        <label className="sidebar-search">
+          <Search aria-hidden="true" />
+          <span className="sr-only">Search games</span>
+          <input
+            value={searchQuery}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder="Search"
+            type="search"
+          />
+        </label>
         <button
           className="sidebar-close"
           type="button"
@@ -328,17 +337,6 @@ function Sidebar({
           <X aria-hidden="true" />
         </button>
       </div>
-
-      <label className="sidebar-search">
-        <Search aria-hidden="true" />
-        <span className="sr-only">Search games</span>
-        <input
-          value={searchQuery}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Search"
-          type="search"
-        />
-      </label>
 
       <nav className="sidebar-nav" aria-label="Sections">
         <SidebarLink
@@ -373,9 +371,6 @@ function Sidebar({
       </nav>
 
       <a className="sidebar-profile" href="https://dylanwlim.com" rel="noreferrer">
-        <span className="profile-mark" aria-hidden="true">
-          <Image src="/icons/dylan-games-mark.svg" alt="" width={28} height={28} />
-        </span>
         <span>dylanwlim.com</span>
       </a>
     </m.aside>
