@@ -44,7 +44,7 @@ import {
   useReducedMotion,
   type Variants,
 } from "motion/react";
-import { useMemo, useState } from "react";
+import { type MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type GameHubView = "games" | "discover" | "favorites" | "genre";
 
@@ -203,6 +203,134 @@ const featuredSlides: FeatureSlide[] = [
   },
 ];
 
+const motionEase = [0.22, 1, 0.36, 1] as const;
+const routeExitDelayMs = 150;
+
+const pageMotionVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 16,
+    scale: 0.992,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.34,
+      ease: motionEase,
+      when: "beforeChildren",
+      staggerChildren: 0.045,
+      delayChildren: 0.03,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    scale: 0.996,
+    transition: {
+      duration: 0.16,
+      ease: [0.4, 0, 1, 1],
+      when: "afterChildren",
+      staggerChildren: 0.018,
+      staggerDirection: -1,
+    },
+  },
+};
+
+const pageCascadeVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.045,
+      delayChildren: 0.02,
+    },
+  },
+  exit: {
+    transition: {
+      staggerChildren: 0.018,
+      staggerDirection: -1,
+    },
+  },
+};
+
+const pageItemVariants: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: motionEase },
+  },
+  exit: {
+    opacity: 0,
+    y: -8,
+    transition: { duration: 0.14, ease: "easeIn" },
+  },
+};
+
+const sidebarPanelVariants: Variants = {
+  hidden: { opacity: 0, x: "-104%", scale: 0.985 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 390,
+      damping: 38,
+      mass: 0.9,
+      when: "beforeChildren",
+      staggerChildren: 0.032,
+      delayChildren: 0.06,
+    },
+  },
+  exit: {
+    opacity: 0,
+    x: "-104%",
+    scale: 0.992,
+    transition: {
+      duration: 0.26,
+      ease: [0.4, 0, 1, 1],
+      when: "afterChildren",
+      staggerChildren: 0.016,
+      staggerDirection: -1,
+    },
+  },
+};
+
+const sidebarItemVariants: Variants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.24, ease: motionEase },
+  },
+  exit: {
+    opacity: 0,
+    x: -8,
+    transition: { duration: 0.12, ease: "easeIn" },
+  },
+};
+
+const gamePanelVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.24,
+      ease: motionEase,
+      when: "beforeChildren",
+      staggerChildren: 0.045,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -8,
+    transition: { duration: 0.16, ease: "easeIn" },
+  },
+};
+
 export function GameHub({
   initialSlug = "snake",
   initialGenre,
@@ -217,9 +345,125 @@ export function GameHub({
   const [featureIndex, setFeatureIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [pageExiting, setPageExiting] = useState(false);
+  const [mainScrolled, setMainScrolled] = useState(false);
+  const mainRef = useRef<HTMLElement | null>(null);
+  const navigationTimeoutRef = useRef<number | null>(null);
   const selectedGame = useMemo(() => getGameBySlug(selectedSlug) ?? fallbackGame, [selectedSlug]);
   const selectedGenre = initialGenre ? getGenreBySlug(initialGenre) : undefined;
   const isGames = view === "games";
+  const contentKey = `${view}:${initialGenre ?? "all"}:${focusGame ? "game" : "store"}`;
+
+  useEffect(() => {
+    return () => {
+      if (navigationTimeoutRef.current) {
+        window.clearTimeout(navigationTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const main = mainRef.current;
+
+    if (!main) {
+      return;
+    }
+
+    let frame = 0;
+    const updateScrolled = () => {
+      frame = 0;
+      const nextScrolled = main.scrollTop > 4;
+      setMainScrolled((current) => (current === nextScrolled ? current : nextScrolled));
+    };
+    const onScroll = () => {
+      if (frame) {
+        return;
+      }
+
+      frame = window.requestAnimationFrame(updateScrolled);
+    };
+
+    updateScrolled();
+    main.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+      }
+
+      main.removeEventListener("scroll", onScroll);
+    };
+  }, [contentKey]);
+
+  const navigateWithMotion = useCallback(
+    (href: string) => {
+      if (!href.startsWith("/")) {
+        return;
+      }
+
+      const currentHref = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+      if (href === currentHref) {
+        setSidebarOpen(false);
+        return;
+      }
+
+      if (navigationTimeoutRef.current) {
+        window.clearTimeout(navigationTimeoutRef.current);
+      }
+
+      setSidebarOpen(false);
+
+      if (shouldReduceMotion) {
+        router.push(href as Route);
+        return;
+      }
+
+      setPageExiting(true);
+      navigationTimeoutRef.current = window.setTimeout(() => {
+        router.push(href as Route);
+      }, routeExitDelayMs);
+    },
+    [router, shouldReduceMotion],
+  );
+
+  const handleMainLinkClick = useCallback(
+    (event: MouseEvent<HTMLElement>) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        !(event.target instanceof Element)
+      ) {
+        return;
+      }
+
+      const anchor = event.target.closest("a");
+
+      if (!anchor || anchor.target || anchor.hasAttribute("download")) {
+        return;
+      }
+
+      const href = anchor.getAttribute("href");
+
+      if (!href || href.startsWith("#")) {
+        return;
+      }
+
+      const url = new URL(anchor.href);
+
+      if (url.origin !== window.location.origin) {
+        return;
+      }
+
+      event.preventDefault();
+      navigateWithMotion(`${url.pathname}${url.search}${url.hash}`);
+    },
+    [navigateWithMotion],
+  );
 
   const selectGame = (game: GameDefinition) => {
     setSelectedSlug(game.slug);
@@ -252,11 +496,9 @@ export function GameHub({
         <AnimatePresence>
           {sidebarOpen ? (
             <>
-              <m.button
+              <m.div
                 className="sidebar-scrim"
-                type="button"
-                aria-label="Dismiss navigation"
-                onClick={() => setSidebarOpen(false)}
+                aria-hidden="true"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -266,29 +508,53 @@ export function GameHub({
                 activeView={view}
                 activeGenre={initialGenre}
                 searchQuery={searchQuery}
+                onNavigate={navigateWithMotion}
                 onSearchChange={setSearchQuery}
                 onClose={() => setSidebarOpen(false)}
               />
             </>
           ) : null}
         </AnimatePresence>
-        <main id="main-content" className="arcade-main">
-          {isGames ? (
-            <GamesView
-              activeGenre={selectedGenre}
-              featureIndex={featureIndex}
-              focusGame={focusGame}
-              searchQuery={searchQuery}
-              selectedGame={selectedGame}
-              shouldReduceMotion={Boolean(shouldReduceMotion)}
-              onFeatureDirection={selectFeature}
-              onFeatureSelect={setFeatureIndex}
-              onGameSelect={selectGame}
-            />
-          ) : (
-            <CollectionView activeGenre={selectedGenre} searchQuery={searchQuery} view={view} />
-          )}
-        </main>
+        <m.div
+          className="arcade-scroll-blur"
+          aria-hidden="true"
+          initial={false}
+          animate={{ opacity: mainScrolled ? 1 : 0 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
+        />
+        <m.main
+          id="main-content"
+          className="arcade-main"
+          ref={mainRef}
+          onClickCapture={handleMainLinkClick}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <m.div
+              key={contentKey}
+              className="page-motion-shell"
+              variants={pageMotionVariants}
+              initial={shouldReduceMotion ? false : "hidden"}
+              animate={pageExiting && !shouldReduceMotion ? "exit" : "visible"}
+              exit={shouldReduceMotion ? undefined : "exit"}
+            >
+              {isGames ? (
+                <GamesView
+                  activeGenre={selectedGenre}
+                  featureIndex={featureIndex}
+                  focusGame={focusGame}
+                  searchQuery={searchQuery}
+                  selectedGame={selectedGame}
+                  shouldReduceMotion={Boolean(shouldReduceMotion)}
+                  onFeatureDirection={selectFeature}
+                  onFeatureSelect={setFeatureIndex}
+                  onGameSelect={selectGame}
+                />
+              ) : (
+                <CollectionView activeGenre={selectedGenre} searchQuery={searchQuery} view={view} />
+              )}
+            </m.div>
+          </AnimatePresence>
+        </m.main>
       </div>
     </LazyMotion>
   );
@@ -298,12 +564,14 @@ function Sidebar({
   activeView,
   activeGenre,
   searchQuery,
+  onNavigate,
   onSearchChange,
   onClose,
 }: {
   activeView: GameHubView;
   activeGenre?: GenreSlug;
   searchQuery: string;
+  onNavigate: (href: string) => void;
   onSearchChange: (value: string) => void;
   onClose: () => void;
 }) {
@@ -312,12 +580,12 @@ function Sidebar({
       id="arcade-sidebar"
       className="arcade-sidebar"
       aria-label="Dylan Games navigation"
-      initial={{ x: "-102%" }}
-      animate={{ x: 0 }}
-      exit={{ x: "-102%" }}
-      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+      variants={sidebarPanelVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
     >
-      <div className="sidebar-topbar">
+      <m.div className="sidebar-topbar" variants={sidebarItemVariants}>
         <label className="sidebar-search">
           <Search aria-hidden="true" />
           <span className="sr-only">Search games</span>
@@ -336,26 +604,29 @@ function Sidebar({
         >
           <X aria-hidden="true" />
         </button>
-      </div>
+      </m.div>
 
-      <nav className="sidebar-nav" aria-label="Sections">
+      <m.nav className="sidebar-nav" aria-label="Sections" variants={pageCascadeVariants}>
         <SidebarLink
           href="/"
           icon={Grid2X2}
           label="Games"
           active={activeView === "games" && !activeGenre}
+          onNavigate={onNavigate}
         />
         <SidebarLink
           href={"/games/favorites" as Route}
           icon={Heart}
           label="Favorites"
           active={activeView === "favorites"}
+          onNavigate={onNavigate}
         />
         <SidebarLink
           href={"/discover" as Route}
           icon={Star}
           label="Discover"
           active={activeView === "discover"}
+          onNavigate={onNavigate}
         />
         {gameGenres
           .filter((genre) => sidebarGenres.includes(genre.slug))
@@ -366,13 +637,19 @@ function Sidebar({
               icon={iconMap[genre.icon]}
               label={genre.label}
               active={activeGenre === genre.slug}
+              onNavigate={onNavigate}
             />
           ))}
-      </nav>
+      </m.nav>
 
-      <a className="sidebar-profile" href="https://dylanwlim.com" rel="noreferrer">
+      <m.a
+        className="sidebar-profile"
+        href="https://dylanwlim.com"
+        rel="noreferrer"
+        variants={sidebarItemVariants}
+      >
         <span>dylanwlim.com</span>
-      </a>
+      </m.a>
     </m.aside>
   );
 }
@@ -382,21 +659,40 @@ function SidebarLink({
   icon: Icon,
   label,
   active,
+  onNavigate,
 }: {
   href: string;
   icon: LucideIcon;
   label: string;
   active: boolean;
+  onNavigate: (href: string) => void;
 }) {
   return (
-    <Link
-      className={`sidebar-link ${active ? "active" : ""}`}
-      href={href as Route}
-      aria-current={active ? "page" : undefined}
-    >
-      <Icon aria-hidden="true" />
-      <span>{label}</span>
-    </Link>
+    <m.div variants={sidebarItemVariants}>
+      <Link
+        className={`sidebar-link ${active ? "active" : ""}`}
+        href={href as Route}
+        aria-current={active ? "page" : undefined}
+        onClick={(event) => {
+          if (
+            event.defaultPrevented ||
+            event.button !== 0 ||
+            event.metaKey ||
+            event.altKey ||
+            event.ctrlKey ||
+            event.shiftKey
+          ) {
+            return;
+          }
+
+          event.preventDefault();
+          onNavigate(href);
+        }}
+      >
+        <Icon aria-hidden="true" />
+        <span>{label}</span>
+      </Link>
+    </m.div>
   );
 }
 
@@ -432,12 +728,16 @@ function GamesView({
   });
 
   return (
-    <div className="games-page">
-      <header className="arcade-title">
+    <m.div className="games-page" variants={pageCascadeVariants}>
+      <m.header className="arcade-title" variants={pageItemVariants}>
         <h1>Games</h1>
-      </header>
+      </m.header>
 
-      <section className="feature-carousel" aria-label="Featured games">
+      <m.section
+        className="feature-carousel"
+        aria-label="Featured games"
+        variants={pageItemVariants}
+      >
         <button
           className="carousel-arrow previous"
           type="button"
@@ -499,13 +799,19 @@ function GamesView({
         >
           <ArrowRight aria-hidden="true" />
         </button>
-      </section>
+      </m.section>
 
-      <GenrePills activeGenre={activeGenre?.slug} />
+      <m.div variants={pageItemVariants}>
+        <GenrePills activeGenre={activeGenre?.slug} />
+      </m.div>
 
       {focusGame ? (
         <>
-          <section className="game-shelf" aria-labelledby="game-shelf-title">
+          <m.section
+            className="game-shelf"
+            aria-labelledby="game-shelf-title"
+            variants={pageItemVariants}
+          >
             <div className="shelf-heading">
               <div>
                 <p>{activeGenre ? activeGenre.label : "All Games"}</p>
@@ -534,14 +840,20 @@ function GamesView({
             ) : (
               <EmptyGenreState genre={activeGenre?.label ?? "Games"} />
             )}
-          </section>
+          </m.section>
 
-          <GameLauncher selectedGame={selectedGame} onPlaySnake={() => onGameSelect(games[0])} />
+          <GameLauncher
+            selectedGame={selectedGame}
+            shouldReduceMotion={shouldReduceMotion}
+            onPlaySnake={() => onGameSelect(games[0])}
+          />
         </>
       ) : (
-        <ArcadeStorefront searchQuery={searchQuery} shouldReduceMotion={shouldReduceMotion} />
+        <m.div variants={pageItemVariants}>
+          <ArcadeStorefront searchQuery={searchQuery} shouldReduceMotion={shouldReduceMotion} />
+        </m.div>
       )}
-    </div>
+    </m.div>
   );
 }
 
@@ -850,8 +1162,8 @@ function CollectionView({
   const previewArt = getCollectionArt(view, activeGenre, visibleGames[0] ?? shelfGames[0]);
 
   return (
-    <div className="collection-page">
-      <header className="collection-hero">
+    <m.div className="collection-page" variants={pageCascadeVariants}>
+      <m.header className="collection-hero" variants={pageItemVariants}>
         <div className="collection-copy">
           <h1>{meta.title}</h1>
           <p>{meta.description}</p>
@@ -867,9 +1179,13 @@ function CollectionView({
           <PreviewArt kind={previewArt.preview} />
           <span>{meta.artLabel}</span>
         </div>
-      </header>
+      </m.header>
 
-      <section className="template-panel-grid" aria-label={`${meta.title} highlights`}>
+      <m.section
+        className="template-panel-grid"
+        aria-label={`${meta.title} highlights`}
+        variants={pageItemVariants}
+      >
         {meta.panels.map((panel) => (
           <article key={panel.title} className="template-panel">
             <p>{panel.label}</p>
@@ -877,9 +1193,13 @@ function CollectionView({
             <span>{panel.body}</span>
           </article>
         ))}
-      </section>
+      </m.section>
 
-      <section className="game-shelf template-shelf" aria-labelledby="template-shelf-title">
+      <m.section
+        className="game-shelf template-shelf"
+        aria-labelledby="template-shelf-title"
+        variants={pageItemVariants}
+      >
         <div className="shelf-heading">
           <div>
             <p>{meta.shelfLabel}</p>
@@ -897,10 +1217,14 @@ function CollectionView({
         ) : (
           <EmptyGenreState genre={meta.title} />
         )}
-      </section>
+      </m.section>
 
-      {view === "discover" ? <DiscoverParallaxContent /> : null}
-    </div>
+      {view === "discover" ? (
+        <m.div variants={pageItemVariants}>
+          <DiscoverParallaxContent />
+        </m.div>
+      ) : null}
+    </m.div>
   );
 }
 
@@ -938,7 +1262,11 @@ function GameTile({
   onSelect: () => void;
 }) {
   return (
-    <div className={`shelf-card ${selected ? "selected" : ""}`} role="listitem">
+    <m.div
+      className={`shelf-card ${selected ? "selected" : ""}`}
+      role="listitem"
+      variants={pageItemVariants}
+    >
       <button type="button" onClick={onSelect} aria-pressed={selected}>
         <span className={`game-preview ${game.preview} accent-${game.accent}`} aria-hidden="true">
           <PreviewArt kind={game.preview} />
@@ -958,7 +1286,7 @@ function GameTile({
           </span>
         </span>
       </button>
-    </div>
+    </m.div>
   );
 }
 
@@ -986,16 +1314,23 @@ function CollectionGameCard({ game }: { game: GameDefinition }) {
 
 function GameLauncher({
   selectedGame,
+  shouldReduceMotion,
   onPlaySnake,
 }: {
   selectedGame: GameDefinition;
+  shouldReduceMotion: boolean;
   onPlaySnake: () => void;
 }) {
   const GameComponent = gameComponents[selectedGame.slug as keyof typeof gameComponents];
 
   return (
-    <section id="launcher" className="launcher-panel" aria-labelledby="launcher-title">
-      <div className="launcher-header">
+    <m.section
+      id="launcher"
+      className="launcher-panel"
+      aria-labelledby="launcher-title"
+      variants={pageItemVariants}
+    >
+      <m.div className="launcher-header">
         <div>
           <p>{selectedGame.status === "playable" ? "Playing" : "Preview"}</p>
           <h2 id="launcher-title">{selectedGame.title}</h2>
@@ -1009,15 +1344,16 @@ function GameLauncher({
           )}
           {selectedGame.status === "playable" ? "Playable" : "Coming soon"}
         </span>
-      </div>
+      </m.div>
 
       <AnimatePresence mode="wait">
         <m.div
           key={selectedGame.slug}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="launcher-motion-surface"
+          variants={gamePanelVariants}
+          initial={shouldReduceMotion ? false : "hidden"}
+          animate="visible"
+          exit={shouldReduceMotion ? undefined : "exit"}
         >
           {GameComponent ? (
             <GameComponent />
@@ -1026,7 +1362,7 @@ function GameLauncher({
           )}
         </m.div>
       </AnimatePresence>
-    </section>
+    </m.section>
   );
 }
 

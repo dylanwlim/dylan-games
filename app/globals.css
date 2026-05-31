@@ -143,6 +143,14 @@ img {
   pointer-events: none;
 }
 
+.sidebar-scrim,
+.arcade-sidebar,
+.page-motion-shell,
+.launcher-motion-surface {
+  transform: translateZ(0);
+  will-change: opacity, transform;
+}
+
 .arcade-sidebar {
   position: fixed;
   top: 6px;
@@ -294,6 +302,30 @@ img {
   padding: 43px 53px 52px 86px;
   scrollbar-color: #777 transparent;
   scrollbar-width: auto;
+}
+
+.arcade-scroll-blur {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 44;
+  height: 86px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgba(255, 255, 255, 0.56) 58%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  -webkit-backdrop-filter: blur(9px) saturate(1.04);
+  backdrop-filter: blur(9px) saturate(1.04);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.86) 62%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.86) 62%, transparent 100%);
+}
+
+.page-motion-shell {
+  min-width: 0;
 }
 
 .arcade-main::-webkit-scrollbar {
