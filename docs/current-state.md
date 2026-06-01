@@ -6,6 +6,13 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-01: Replaced the Dylan Games favicon with the updated black
+  controller mark from `UpdatedLogo.png`, renamed it into
+  `public/icons/dylan-games-icon.png`, regenerated the favicon/app icon/PWA
+  PNG and ICO variants with transparency, and versioned icon metadata links for
+  cache refresh. Vercel preview deployment `dpl_6EYD2E61qtkERAtFE1MGDGPDzykS`
+  built successfully at
+  `https://dylan-games-pfs0d76td-dylans-projects-73251aac.vercel.app`.
 - 2026-05-31: Removed the app-level ICO route that triggered the Next dev
   favicon decoder overlay, regenerated root favicon PNG/ICO assets with alpha,
   and rechecked the hub in desktop and mobile browser viewports.
