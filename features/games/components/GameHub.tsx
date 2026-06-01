@@ -209,38 +209,33 @@ const pageItemVariants: Variants = {
 const sidebarPanelVariants: Variants = {
   collapsed: {
     width: 64,
-    transition: {
-      type: "spring",
-      stiffness: 430,
-      damping: 42,
-      mass: 0.8,
-    },
   },
   expanded: {
     width: 276,
-    transition: {
-      type: "spring",
-      stiffness: 390,
-      damping: 40,
-      mass: 0.86,
-      when: "beforeChildren",
-      staggerChildren: 0.032,
-      delayChildren: 0.04,
-    },
   },
 };
 
-const sidebarItemVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  visible: {
+const sidebarContentVariants: Variants = {
+  collapsed: {
     opacity: 1,
-    x: 0,
-    transition: { duration: 0.24, ease: motionEase },
   },
-  exit: {
-    opacity: 0,
-    x: -8,
-    transition: { duration: 0.12, ease: "easeIn" },
+  expanded: {
+    opacity: 1,
+  },
+};
+
+const sidebarStaggerVariants: Variants = {
+  collapsed: {
+    transition: {
+      staggerChildren: 0.015,
+      staggerDirection: -1,
+    },
+  },
+  expanded: {
+    transition: {
+      staggerChildren: 0.03,
+      delayChildren: 0.02,
+    },
   },
 };
 
@@ -516,6 +511,45 @@ function Sidebar({
   onHoverEnd: () => void;
 }) {
   const sidebarState = expanded ? "expanded" : "collapsed";
+  const shouldReduceMotion = useReducedMotion();
+  const sidebarTransition = shouldReduceMotion
+    ? { duration: 0 }
+    : { type: "tween" as const, ease: "easeOut" as const, duration: 0.2 };
+  const staggerVariants = useMemo<Variants>(
+    () =>
+      shouldReduceMotion
+        ? {
+            collapsed: {},
+            expanded: {},
+          }
+        : sidebarStaggerVariants,
+    [shouldReduceMotion],
+  );
+  const labelVariants = useMemo<Variants>(
+    () => ({
+      collapsed: {
+        opacity: 0,
+        x: -20,
+        transition: shouldReduceMotion
+          ? { duration: 0 }
+          : {
+              opacity: { duration: 0.1, ease: "easeOut" },
+              x: { type: "spring", stiffness: 100, damping: 24 },
+            },
+      },
+      expanded: {
+        opacity: 1,
+        x: 0,
+        transition: shouldReduceMotion
+          ? { duration: 0 }
+          : {
+              opacity: { duration: 0.16, ease: "easeOut" },
+              x: { type: "spring", stiffness: 1000, damping: 64, velocity: -100 },
+            },
+      },
+    }),
+    [shouldReduceMotion],
+  );
 
   return (
     <m.aside
@@ -525,6 +559,7 @@ function Sidebar({
       variants={sidebarPanelVariants}
       initial={false}
       animate={sidebarState}
+      transition={sidebarTransition}
       data-pinned={pinned ? "true" : "false"}
       onMouseEnter={onHoverStart}
       onMouseLeave={onHoverEnd}
@@ -537,7 +572,7 @@ function Sidebar({
         }
       }}
     >
-      <m.div className="sidebar-topbar" variants={sidebarItemVariants}>
+      <m.div className="sidebar-topbar" variants={sidebarContentVariants}>
         <button
           className="sidebar-toggle"
           type="button"
@@ -555,6 +590,7 @@ function Sidebar({
             value={searchQuery}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder="Search"
+            tabIndex={expanded ? undefined : -1}
             type="search"
           />
         </label>
@@ -563,17 +599,20 @@ function Sidebar({
           type="button"
           onClick={onClose}
           aria-label="Close navigation"
+          tabIndex={expanded ? undefined : -1}
         >
           <X aria-hidden="true" />
         </button>
       </m.div>
 
-      <m.nav className="sidebar-nav" aria-label="Sections" variants={pageCascadeVariants}>
+      <m.nav className="sidebar-nav" aria-label="Sections" variants={staggerVariants}>
         <SidebarLink
           href="/"
           icon={Grid2X2}
           label="Games"
           active={activeView === "games" && !activeGenre}
+          expanded={expanded}
+          labelVariants={labelVariants}
           onNavigate={onNavigate}
         />
         <SidebarLink
@@ -581,6 +620,8 @@ function Sidebar({
           icon={Heart}
           label="Favorites"
           active={activeView === "favorites"}
+          expanded={expanded}
+          labelVariants={labelVariants}
           onNavigate={onNavigate}
         />
         <SidebarLink
@@ -588,6 +629,8 @@ function Sidebar({
           icon={Star}
           label="Discover"
           active={activeView === "discover"}
+          expanded={expanded}
+          labelVariants={labelVariants}
           onNavigate={onNavigate}
         />
         {gameGenres
@@ -599,6 +642,8 @@ function Sidebar({
               icon={iconMap[genre.icon]}
               label={genre.label}
               active={activeGenre === genre.slug}
+              expanded={expanded}
+              labelVariants={labelVariants}
               onNavigate={onNavigate}
             />
           ))}
@@ -608,9 +653,11 @@ function Sidebar({
         className="sidebar-profile"
         href="https://dylanwlim.com"
         rel="noreferrer"
-        variants={sidebarItemVariants}
+        variants={labelVariants}
+        aria-hidden={!expanded}
+        tabIndex={expanded ? undefined : -1}
       >
-        <span>dylanwlim.com</span>
+        <span className="sidebar-profile-label">dylanwlim.com</span>
       </m.a>
     </m.aside>
   );
@@ -621,20 +668,25 @@ function SidebarLink({
   icon: Icon,
   label,
   active,
+  expanded,
+  labelVariants,
   onNavigate,
 }: {
   href: string;
   icon: LucideIcon;
   label: string;
   active: boolean;
+  expanded: boolean;
+  labelVariants: Variants;
   onNavigate: (href: string) => void;
 }) {
   return (
-    <m.div variants={sidebarItemVariants}>
+    <m.div>
       <Link
         className={`sidebar-link ${active ? "active" : ""}`}
         href={href as Route}
         aria-current={active ? "page" : undefined}
+        aria-label={label}
         onClick={(event) => {
           if (
             event.defaultPrevented ||
@@ -651,8 +703,12 @@ function SidebarLink({
           onNavigate(href);
         }}
       >
-        <Icon aria-hidden="true" />
-        <span>{label}</span>
+        <span className="sidebar-icon-slot" aria-hidden="true">
+          <Icon aria-hidden="true" />
+        </span>
+        <m.span className="sidebar-label" variants={labelVariants} aria-hidden={!expanded}>
+          {label}
+        </m.span>
       </Link>
     </m.div>
   );

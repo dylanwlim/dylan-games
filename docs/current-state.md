@@ -6,6 +6,11 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-01: Reworked only the existing sidebar motion system with
+  Motion-driven collapsed/expanded width tweening, staggered label opacity/x
+  reveal, fixed icon rail alignment, muted gray hover/active highlights with
+  active icons kept blue, and immediate reduced-motion behavior. Verified
+  desktop, tablet, and mobile sidebar behavior locally.
 - 2026-06-01: Replaced the Dylan Games favicon with the updated black
   controller mark from `UpdatedLogo.png`, renamed it into
   `public/icons/dylan-games-icon.png`, regenerated the favicon/app icon/PWA
