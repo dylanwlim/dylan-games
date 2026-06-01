@@ -2,11 +2,11 @@
 
 import type { Route } from "next";
 import Link from "next/link";
-import { CalendarDays, Flame, Sparkles } from "lucide-react";
+import { CalendarDays, Flame } from "lucide-react";
 import { m, useReducedMotion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 
-import { getCanonicalCipherwordDate } from "./dailyAnswers";
+import { getCanonicalCipherwordDate, getCipherwordDailyIndex } from "./dailyAnswers";
 import { cipherwordStatsStorageKey, parseCipherwordStats } from "./stats";
 
 type DailyCipherwordCTAVariant = "card" | "compact" | "banner";
@@ -14,24 +14,42 @@ type DailyCipherwordCTAVariant = "card" | "compact" | "banner";
 export function DailyCipherwordCTA({ variant = "card" }: { variant?: DailyCipherwordCTAVariant }) {
   const shouldReduceMotion = useReducedMotion();
   const todayKey = useMemo(() => getCanonicalCipherwordDate(), []);
+  const dailyNumber = useMemo(() => getCipherwordDailyIndex(todayKey) + 1, [todayKey]);
   const [solved, setSolved] = useState(false);
   const [streak, setStreak] = useState(0);
+  const [guessCount, setGuessCount] = useState(0);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       try {
         const stats = parseCipherwordStats(window.localStorage.getItem(cipherwordStatsStorageKey));
+        const rawProgress = window.localStorage.getItem(
+          `dylan-games:cipherword-progress:v1:daily:${todayKey}`,
+        );
+        const progress = rawProgress ? (JSON.parse(rawProgress) as unknown) : [];
+
         setSolved(stats.daily.solvedDates.includes(todayKey));
         setStreak(stats.daily.currentStreak);
+        setGuessCount(
+          Array.isArray(progress)
+            ? progress.filter((guess) => typeof guess === "string").slice(0, 6).length
+            : 0,
+        );
       } catch {
         setSolved(false);
+        setGuessCount(0);
       }
     }, 0);
 
     return () => window.clearTimeout(timeout);
   }, [todayKey]);
 
-  const status = solved ? "Solved today" : "Daily unsolved";
+  const status = solved ? "Solved" : guessCount ? "In progress" : "Unsolved";
+  const statusLine = solved
+    ? "Solved today"
+    : guessCount
+      ? `${guessCount}/6 guesses used`
+      : "Today’s puzzle not solved";
   const action = solved ? "Play Unlimited" : "Play";
   const href = solved ? "/games/cipherword?mode=unlimited" : "/games/cipherword";
 
@@ -44,16 +62,28 @@ export function DailyCipherwordCTA({ variant = "card" }: { variant?: DailyCipher
       transition={{ duration: 0.22, ease: "easeOut" }}
     >
       <span className="cipherword-cta-icon" aria-hidden="true">
-        <Sparkles />
+        <span>C</span>
+        <span>I</span>
+        <span>P</span>
       </span>
       <span className="cipherword-cta-copy">
         <strong>Daily Cipherword</strong>
-        <span>{status}</span>
+        <span>{statusLine}</span>
       </span>
-      <span className="cipherword-cta-meta" aria-label={`Current streak ${streak}`}>
-        <Flame aria-hidden="true" />
-        {streak}
+      <span className="cipherword-cta-details">
+        <span>Daily #{String(dailyNumber).padStart(3, "0")}</span>
+        <span
+          className={`cipherword-cta-badge ${solved ? "solved" : guessCount ? "progress" : ""}`}
+        >
+          {status}
+        </span>
       </span>
+      {streak > 0 ? (
+        <span className="cipherword-cta-meta" aria-label={`Current streak ${streak}`}>
+          <Flame aria-hidden="true" />
+          Streak {streak}
+        </span>
+      ) : null}
       <Link className="cipherword-cta-action" href={href as Route}>
         {action}
       </Link>

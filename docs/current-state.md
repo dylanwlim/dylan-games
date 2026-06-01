@@ -6,6 +6,15 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-01: Reworked the games home storefront from the pasted issue list:
+  the featured hero is now a Motion carousel with autoplay, pause, arrows, dots,
+  progress, swipe, keyboard controls, ARIA carousel structure, and treated
+  non-readable artwork; Continue Playing shows clearer Cipherword/Snake resume
+  state; the live grid is now Playable Games; category chips focus on useful
+  playable filters; and Coming Soon uses tighter, less repetitive preview
+  cards. Verified Browser desktop rendering/navigation and `npm run validate`
+  across format, lint, typecheck, unit tests, build, and desktop/mobile
+  Playwright.
 - 2026-06-01: Reduced Snake input latency without UI changes by making the
   hook's live game snapshot update synchronously before React render catches up,
   so queued keyboard/swipe/touch moves are visible to the animation loop on the

@@ -15,6 +15,8 @@ import { useRouter } from "next/navigation";
 import {
   ArrowUpRight,
   Boxes,
+  ChevronLeft,
+  ChevronRight,
   Crosshair,
   Flag,
   Gamepad2,
@@ -44,7 +46,16 @@ import {
   useReducedMotion,
   type Variants,
 } from "motion/react";
-import { type MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type FocusEvent,
+  type KeyboardEvent,
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 type GameHubView = "games" | "discover" | "favorites" | "genre";
 
@@ -140,14 +151,87 @@ const iconMap = {
   zap: Zap,
 } satisfies Record<string, LucideIcon>;
 
-const featuredSpotlight = {
-  label: "Daily",
-  title: "Cipherword",
-  summary: "Guess the hidden concept through letters, meaning distance, and clue unlocks.",
-  image: "/art/feature-cipherword.svg",
-  gameSlug: "cipherword",
-  meta: ["Daily", "Archive", "Unlimited"],
-} as const;
+type FeaturedGameSlide = {
+  title: string;
+  description: string;
+  detail: string;
+  mode: string;
+  tags: string[];
+  image: string;
+  imagePosition: string;
+  route: Route;
+  primaryCta: string;
+  primaryAriaLabel: string;
+  secondaryCta: {
+    label: string;
+    route: Route;
+    ariaLabel: string;
+  };
+  accent: GameDefinition["accent"];
+  preview: GameDefinition["preview"];
+};
+
+const featureAutoplayMs = 6200;
+
+const featuredGames: FeaturedGameSlide[] = [
+  {
+    title: "Cipherword",
+    description: "Find the hidden concept using letters, meaning, and unlocked clues.",
+    detail: "A daily word-logic puzzle built around meaning, clues, and deduction.",
+    mode: "Today's Challenge",
+    tags: ["Daily #001", "Word logic", "2-4 min"],
+    image: "/art/feature-cipherword.svg",
+    imagePosition: "center 54%",
+    route: "/games/cipherword" as Route,
+    primaryCta: "Play today's puzzle",
+    primaryAriaLabel: "Play Cipherword from Featured",
+    secondaryCta: {
+      label: "View archive",
+      route: "/games/cipherword/archive" as Route,
+      ariaLabel: "View Cipherword archive from Featured",
+    },
+    accent: "violet",
+    preview: "cipherword",
+  },
+  {
+    title: "Snake",
+    description: "Guide the snake, chain apples, and beat your best run.",
+    detail: "A quick arcade run with clean turns, instant restarts, and saved best scores.",
+    mode: "Arcade Run",
+    tags: ["Action", "1-min rounds", "Best-score chase"],
+    image: "/art/feature-snake.svg",
+    imagePosition: "center 42%",
+    route: "/games/snake" as Route,
+    primaryCta: "Play Snake",
+    primaryAriaLabel: "Play Snake from Featured",
+    secondaryCta: {
+      label: "Action shelf",
+      route: "/genres/action" as Route,
+      ariaLabel: "Open Action shelf from Featured",
+    },
+    accent: "green",
+    preview: "snake",
+  },
+  {
+    title: "Dashline",
+    description: "A quick racing challenge built for clean routes, tight turns, and fast restarts.",
+    detail: "Featured upcoming work for short races, readable routes, and quick resets.",
+    mode: "Featured Upcoming",
+    tags: ["Expected Summer 2026", "Racing", "Prototype"],
+    image: "/art/discover-racing.png",
+    imagePosition: "center 50%",
+    route: "/games/dashline" as Route,
+    primaryCta: "Preview Dashline",
+    primaryAriaLabel: "Preview Dashline from Featured",
+    secondaryCta: {
+      label: "Racing shelf",
+      route: "/genres/racing" as Route,
+      ariaLabel: "Open Racing shelf from Featured",
+    },
+    accent: "slate",
+    preview: "dashline",
+  },
+];
 
 const motionEase = [0.22, 1, 0.36, 1] as const;
 const routeExitDelayMs = 150;
@@ -834,57 +918,272 @@ function GamesView({
 }
 
 function FeatureHero({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
-  const game = getGameBySlug(featuredSpotlight.gameSlug) ?? fallbackGame;
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const [hoverPaused, setHoverPaused] = useState(false);
+  const [focusPaused, setFocusPaused] = useState(false);
+  const [dragPaused, setDragPaused] = useState(false);
+  const [documentHidden, setDocumentHidden] = useState(false);
+  const activeSlide = featuredGames[activeIndex] ?? featuredGames[0];
+  const autoplayPaused =
+    shouldReduceMotion || hoverPaused || focusPaused || dragPaused || documentHidden;
+  const slideVariants = useMemo<Variants>(
+    () => ({
+      enter: (travelDirection: number) => ({
+        opacity: 0,
+        x: shouldReduceMotion ? 0 : travelDirection > 0 ? 24 : -24,
+        scale: shouldReduceMotion ? 1 : 0.985,
+      }),
+      center: {
+        opacity: 1,
+        x: 0,
+        scale: 1,
+        transition: {
+          duration: shouldReduceMotion ? 0 : 0.58,
+          ease: motionEase,
+        },
+      },
+      exit: (travelDirection: number) => ({
+        opacity: 0,
+        x: shouldReduceMotion ? 0 : travelDirection > 0 ? -24 : 24,
+        scale: shouldReduceMotion ? 1 : 0.985,
+        transition: {
+          duration: shouldReduceMotion ? 0 : 0.24,
+          ease: "easeIn",
+        },
+      }),
+    }),
+    [shouldReduceMotion],
+  );
+
+  const goToSlide = useCallback(
+    (nextIndex: number, nextDirection = nextIndex > activeIndex ? 1 : -1) => {
+      const total = featuredGames.length;
+      const boundedIndex = ((nextIndex % total) + total) % total;
+
+      if (boundedIndex === activeIndex) {
+        return;
+      }
+
+      setDirection(nextDirection);
+      setActiveIndex(boundedIndex);
+    },
+    [activeIndex],
+  );
+
+  const showPreviousSlide = useCallback(() => {
+    goToSlide(activeIndex - 1, -1);
+  }, [activeIndex, goToSlide]);
+
+  const showNextSlide = useCallback(() => {
+    goToSlide(activeIndex + 1, 1);
+  }, [activeIndex, goToSlide]);
+
+  useEffect(() => {
+    const updateVisibility = () => {
+      setDocumentHidden(document.visibilityState === "hidden");
+    };
+
+    updateVisibility();
+    document.addEventListener("visibilitychange", updateVisibility);
+
+    return () => {
+      document.removeEventListener("visibilitychange", updateVisibility);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (autoplayPaused) {
+      return;
+    }
+
+    const timeout = window.setTimeout(showNextSlide, featureAutoplayMs);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [autoplayPaused, showNextSlide]);
+
+  const handleCarouselKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        showPreviousSlide();
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        showNextSlide();
+      }
+    },
+    [showNextSlide, showPreviousSlide],
+  );
+
+  const handleCarouselBlur = useCallback((event: FocusEvent<HTMLElement>) => {
+    const nextTarget = event.relatedTarget;
+
+    if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
+      setFocusPaused(false);
+    }
+  }, []);
 
   return (
-    <m.section className="feature-spotlight" aria-label="Featured game" variants={pageItemVariants}>
+    <m.section
+      className="feature-spotlight"
+      aria-label="Featured games"
+      variants={pageItemVariants}
+    >
       <m.div
-        className="feature-card"
+        className={`feature-card accent-${activeSlide.accent}`}
+        aria-label={`Featured games carousel, slide ${activeIndex + 1} of ${featuredGames.length}`}
+        aria-roledescription="carousel"
+        role="region"
+        tabIndex={0}
         initial={shouldReduceMotion ? false : { opacity: 0.92, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.28, ease: "easeOut" }}
+        onBlurCapture={handleCarouselBlur}
+        onFocusCapture={() => setFocusPaused(true)}
+        onKeyDown={handleCarouselKeyDown}
+        onPointerEnter={() => setHoverPaused(true)}
+        onPointerLeave={() => setHoverPaused(false)}
       >
-        <Image
-          src={featuredSpotlight.image}
-          alt={`${featuredSpotlight.title} gameplay artwork`}
-          fill
-          preload
-          loading="eager"
-          sizes="(max-width: 900px) 100vw, calc(100vw - 96px)"
-          className="feature-image"
-        />
-        <div className="feature-scrim" aria-hidden="true" />
-        <div className="feature-copy">
-          <p>{featuredSpotlight.label}</p>
-          <h2>{featuredSpotlight.title}</h2>
-          <span>{featuredSpotlight.summary}</span>
-          <div className="feature-actions">
-            <Link
-              className="primary-play-button"
-              href={`/games/${featuredSpotlight.gameSlug}` as Route}
-              aria-label={`Play ${featuredSpotlight.title} from Featured`}
-            >
-              <Play aria-hidden="true" />
-              Play
-            </Link>
-            <div className="feature-meta" aria-label={`${featuredSpotlight.title} details`}>
-              {featuredSpotlight.meta.map((item) => (
-                <span key={item}>{item}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-        <Link
-          className="feature-app-card"
-          href={`/games/${game.slug}` as Route}
-          aria-label={`Open ${game.title} details`}
+        <m.div
+          className="feature-swipe-layer"
+          drag={shouldReduceMotion ? false : "x"}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.18}
+          onDragStart={() => setDragPaused(true)}
+          onDragEnd={(_, info) => {
+            setDragPaused(false);
+
+            const swipe = info.offset.x + info.velocity.x * 0.16;
+
+            if (swipe < -52) {
+              showNextSlide();
+            }
+
+            if (swipe > 52) {
+              showPreviousSlide();
+            }
+          }}
         >
-          <ArcadeAppIcon game={game} small />
-          <span className="feature-app-copy">
-            <strong>{game.title}</strong>
-            <small>{game.summary}</small>
+          <AnimatePresence custom={direction} initial={false} mode="popLayout">
+            <m.div
+              key={activeSlide.title}
+              className="feature-slide"
+              aria-label={`${activeSlide.title}, ${activeIndex + 1} of ${featuredGames.length}`}
+              aria-roledescription="slide"
+              custom={direction}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              variants={slideVariants}
+            >
+              <Image
+                src={activeSlide.image}
+                alt=""
+                fill
+                priority={activeIndex === 0}
+                loading={activeIndex === 0 ? "eager" : "lazy"}
+                sizes="(max-width: 900px) 100vw, calc(100vw - 96px)"
+                className={`feature-image ${activeSlide.preview}`}
+                style={{ objectPosition: activeSlide.imagePosition }}
+              />
+              <div className="feature-scrim" aria-hidden="true" />
+              <div className="feature-copy">
+                <p>{activeSlide.mode}</p>
+                <h2>{activeSlide.title}</h2>
+                <span>{activeSlide.description}</span>
+                <div className="feature-actions">
+                  <Link
+                    className="primary-play-button"
+                    href={activeSlide.route}
+                    aria-label={activeSlide.primaryAriaLabel}
+                  >
+                    <Play aria-hidden="true" />
+                    {activeSlide.primaryCta}
+                  </Link>
+                  <Link
+                    className="feature-secondary-button"
+                    href={activeSlide.secondaryCta.route}
+                    aria-label={activeSlide.secondaryCta.ariaLabel}
+                  >
+                    {activeSlide.secondaryCta.label}
+                    <ArrowUpRight aria-hidden="true" />
+                  </Link>
+                </div>
+                <div className="feature-meta" aria-label={`${activeSlide.title} details`}>
+                  {activeSlide.tags.map((item) => (
+                    <span key={item}>{item}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="feature-game-preview" aria-hidden="true">
+                <ArcadeAppIcon
+                  game={{
+                    ...fallbackGame,
+                    slug: activeSlide.title.toLowerCase(),
+                    title: activeSlide.title,
+                    genre:
+                      activeSlide.title === "Snake"
+                        ? "Action"
+                        : activeSlide.title === "Dashline"
+                          ? "Racing"
+                          : "Word",
+                    status: activeSlide.title === "Dashline" ? "coming-soon" : "playable",
+                    summary: activeSlide.detail,
+                    description: activeSlide.detail,
+                    accent: activeSlide.accent,
+                    preview: activeSlide.preview,
+                    priority: activeIndex,
+                  }}
+                  small
+                />
+                <span className="feature-app-copy">
+                  <strong>{activeSlide.mode}</strong>
+                  <small>{activeSlide.detail}</small>
+                </span>
+              </div>
+            </m.div>
+          </AnimatePresence>
+        </m.div>
+        <button
+          className="feature-arrow previous"
+          type="button"
+          onClick={showPreviousSlide}
+          aria-label="Show previous featured game"
+        >
+          <ChevronLeft aria-hidden="true" />
+        </button>
+        <button
+          className="feature-arrow next"
+          type="button"
+          onClick={showNextSlide}
+          aria-label="Show next featured game"
+        >
+          <ChevronRight aria-hidden="true" />
+        </button>
+        <div className="feature-carousel-controls" aria-label="Featured game slides">
+          <div className="feature-dots">
+            {featuredGames.map((slide, index) => (
+              <button
+                key={slide.title}
+                className={`feature-dot accent-${slide.accent} ${index === activeIndex ? "active" : ""}`}
+                type="button"
+                onClick={() => goToSlide(index)}
+                aria-label={`Show ${slide.title} featured slide`}
+                aria-pressed={index === activeIndex}
+              />
+            ))}
+          </div>
+          <span className="feature-progress" aria-hidden="true">
+            <span
+              key={`${activeIndex}-${autoplayPaused ? "paused" : "running"}`}
+              className={autoplayPaused ? "is-paused" : "is-running"}
+            />
           </span>
-        </Link>
+        </div>
       </m.div>
     </m.section>
   );
@@ -955,7 +1254,12 @@ function ArcadeStorefront({
   if (searchQuery.trim() && visibleCount === 0) {
     return (
       <m.div className="arcade-storefront" {...motionProps}>
-        <GenrePills activeGenre={effectiveGenre} resultCount={0} onGenreChange={onGenreChange} />
+        <GenrePills
+          activeGenre={effectiveGenre}
+          playableOnly={!hasSearch}
+          resultCount={0}
+          onGenreChange={onGenreChange}
+        />
         <EmptyGenreState genre="Search" />
       </m.div>
     );
@@ -966,6 +1270,7 @@ function ArcadeStorefront({
       {!hasSearch ? <ContinuePlayingSection /> : null}
       <GenrePills
         activeGenre={effectiveGenre}
+        playableOnly={!hasSearch}
         resultCount={visibleCount}
         onGenreChange={onGenreChange}
       />
@@ -985,24 +1290,25 @@ function AllGamesSection({
   searchQuery: string;
 }) {
   const activeLabel = activeGenre ? getGenreBySlug(activeGenre)?.label : undefined;
-  const titleId = "all-games-title";
+  const titleId = "playable-games-title";
 
   return (
     <m.section
       className="store-section all-games-section"
+      id="playable-games"
       aria-labelledby={titleId}
       variants={storefrontSectionVariants}
     >
       <div className="store-section-header">
         <div>
-          <h2 id={titleId}>{searchQuery.trim() ? "Playable results" : "All Games"}</h2>
+          <h2 id={titleId}>{searchQuery.trim() ? "Playable results" : "Playable Games"}</h2>
           <p>
             {activeLabel
               ? `${activeLabel} games that are playable in the browser right now.`
-              : "Playable games ready for a quick browser session."}
+              : "Ready for a quick browser session."}
           </p>
         </div>
-        <span>{sectionGames.length} playable</span>
+        <span className="section-count-badge">Playable {sectionGames.length}</span>
       </div>
       {sectionGames.length ? (
         <div className="store-card-grid live" role="list">
@@ -1038,7 +1344,7 @@ function ContinuePlayingSection() {
       <div className="store-section-header compact">
         <div>
           <h2 id="continue-playing-title">Continue Playing</h2>
-          <p>Start today&apos;s word puzzle or jump back into a quick arcade run.</p>
+          <p>Resume today&apos;s puzzle or jump back into your latest run.</p>
         </div>
       </div>
       <div className="continue-rail">
@@ -1062,6 +1368,26 @@ function ContinueCard({
   image: string;
   summary: string;
 }) {
+  const [bestScore, setBestScore] = useState(0);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      try {
+        const rawScores = window.localStorage.getItem("dylan-games:snake-best-scores");
+        const parsed = rawScores ? (JSON.parse(rawScores) as Record<string, unknown>) : {};
+        const scores = Object.values(parsed).filter(
+          (score): score is number => typeof score === "number" && Number.isFinite(score),
+        );
+
+        setBestScore(scores.length ? Math.max(0, ...scores.map((score) => Math.floor(score))) : 0);
+      } catch {
+        setBestScore(0);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, []);
+
   return (
     <m.div variants={storefrontItemVariants}>
       <Link
@@ -1084,16 +1410,78 @@ function ContinueCard({
             <strong>{game.title}</strong>
             <em>{summary}</em>
           </span>
-          <span className="store-get-button">Resume</span>
+          <span className="continue-stats" aria-label={`Best Snake score ${bestScore}`}>
+            <Trophy aria-hidden="true" />
+            Best {bestScore}
+          </span>
+          <span className="store-get-button">Resume Snake</span>
         </span>
       </Link>
     </m.div>
   );
 }
 
+function getUpcomingStage(game: GameDefinition) {
+  if (game.slug === "dashline" || game.slug === "minesweeper") {
+    return "In progress";
+  }
+
+  if (game.slug === "pong" || game.slug === "tiles") {
+    return "Prototype";
+  }
+
+  return "Planned";
+}
+
+function getUpcomingTiming(game: GameDefinition) {
+  if (game.slug === "dashline") {
+    return "Expected Summer 2026";
+  }
+
+  if (game.slug === "minesweeper" || game.slug === "pong" || game.slug === "tiles") {
+    return "Prototype";
+  }
+
+  return "Designing";
+}
+
+function getUpcomingDescription(game: GameDefinition) {
+  if (game.slug === "dashline") {
+    return "A quick racing challenge built for clean routes, tight turns, and fast restarts.";
+  }
+
+  if (game.slug === "minesweeper") {
+    return "Classic mine-clearing with clean counts and readable boards.";
+  }
+
+  if (game.slug === "pong") {
+    return "Fast paddle rallies with crisp ball movement.";
+  }
+
+  if (game.slug === "tiles") {
+    return "A compact falling-block puzzle built for quick sessions.";
+  }
+
+  if (game.slug === "orbit") {
+    return "Time each tap to stay locked in orbit.";
+  }
+
+  return game.summary;
+}
+
 function StoreGameCard({ game, source }: { game: GameDefinition; source: string }) {
   const isPlayable = game.status === "playable";
-  const action = isPlayable ? "Play" : "In progress";
+  const action = "Play";
+  const statusLabel = isPlayable ? (game.daily ? "Daily" : "Arcade") : getUpcomingStage(game);
+  const duration = game.duration ?? (game.slug === "snake" ? "1-min rounds" : "Quick session");
+  const summary =
+    game.slug === "snake"
+      ? "Guide the snake, chain apples, and beat your best run."
+      : game.slug === "cipherword"
+        ? "Solve the hidden concept with letters, clues, and meaning."
+        : isPlayable
+          ? game.summary
+          : getUpcomingDescription(game);
   const cardContent = (
     <>
       <ArcadeAppIcon game={game} />
@@ -1102,16 +1490,16 @@ function StoreGameCard({ game, source }: { game: GameDefinition; source: string 
           <strong>{game.title}</strong>
           <span className={`mini-status ${game.status}`}>
             {isPlayable ? <Gamepad2 aria-hidden="true" /> : <Lock aria-hidden="true" />}
-            {isPlayable ? "Playable" : "Coming soon"}
+            {statusLabel}
           </span>
         </span>
-        <span>{game.summary}</span>
+        <span>{summary}</span>
         <span className="store-game-meta">
           <small>{game.genre}</small>
-          <small>{isPlayable ? (game.duration ?? "1 min rounds") : "Not playable yet"}</small>
+          <small>{isPlayable ? duration : getUpcomingTiming(game)}</small>
         </span>
       </span>
-      <span className={`store-get-button ${isPlayable ? "" : "secondary"}`}>{action}</span>
+      {isPlayable ? <span className="store-get-button">{action}</span> : null}
     </>
   );
 
@@ -1163,12 +1551,13 @@ function ComingSoonSection({
           <p>
             {searching
               ? "Unreleased matches stay visible but are disabled until they are playable."
-              : "Unreleased concepts are grouped here so playable games stay clear."}
+              : "Upcoming games in development. Playable games stay above."}
           </p>
         </div>
       </div>
       <div className="coming-soon-layout">
         <article className="coming-soon-card is-disabled" data-disabled="true">
+          <span className="coming-soon-status">Featured upcoming</span>
           <span className="coming-soon-media">
             <Image
               src="/art/discover-racing.png"
@@ -1181,12 +1570,11 @@ function ComingSoonSection({
           <span className="coming-soon-copy">
             <small>Expected Summer 2026</small>
             <strong>{featuredGame.title}</strong>
-            <span>{featuredGame.description}</span>
+            <span>{getUpcomingDescription(featuredGame)}</span>
             <span className="coming-soon-meta">
               <span>{featuredGame.genre}</span>
-              <span>Not playable yet</span>
+              <span>{getUpcomingStage(featuredGame)}</span>
             </span>
-            <span className="store-get-button secondary">In progress</span>
           </span>
         </article>
         {supportingGames.length ? (
@@ -1309,17 +1697,26 @@ function CollectionView({
 
 function GenrePills({
   activeGenre,
+  playableOnly,
   resultCount,
   onGenreChange,
 }: {
   activeGenre?: GenreSlug;
+  playableOnly: boolean;
   resultCount: number;
   onGenreChange: (genre: GenreSlug | undefined) => void;
 }) {
   const allCount = games.length;
+  const playableCount = games.filter((game) => game.status === "playable").length;
+  const genresForFilters = gameGenres.filter((genre) =>
+    games.some(
+      (game) => game.genre === genre.label && (!playableOnly || game.status === "playable"),
+    ),
+  );
 
   return (
     <nav className="genre-pills" aria-label="Game genres">
+      <span className="genre-filter-label">Filter by category</span>
       <button
         className={`genre-pill ${!activeGenre ? "active" : ""}`}
         type="button"
@@ -1327,12 +1724,19 @@ function GenrePills({
         aria-pressed={!activeGenre}
       >
         <Grid2X2 aria-hidden="true" />
-        <span>All Games</span>
+        <span>All</span>
         <small>{allCount}</small>
       </button>
-      {gameGenres.map((genre) => {
+      <span className="genre-pill static" aria-label={`${playableCount} playable games`}>
+        <Gamepad2 aria-hidden="true" />
+        <span>Playable</span>
+        <small>{playableCount}</small>
+      </span>
+      {genresForFilters.map((genre) => {
         const Icon = iconMap[genre.icon];
-        const genreCount = games.filter((game) => game.genre === genre.label).length;
+        const genreCount = games.filter(
+          (game) => game.genre === genre.label && (!playableOnly || game.status === "playable"),
+        ).length;
 
         return (
           <button

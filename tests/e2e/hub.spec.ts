@@ -22,8 +22,9 @@ test("renders the hub and launches the featured Cipherword game", async ({ page 
     await expect(page.getByRole("link", { name: "dylanwlim.com" })).toBeHidden();
   }
   await expect(page.getByRole("heading", { name: "Continue Playing" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "All Games" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Playable Games" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Coming Soon" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Show next featured game" })).toBeVisible();
   await expect(page.getByText("Game Center")).toHaveCount(0);
   await expect(page.getByText("Get", { exact: true })).toHaveCount(0);
 
@@ -33,7 +34,7 @@ test("renders the hub and launches the featured Cipherword game", async ({ page 
     page.getByRole("heading", { name: "Daily semantic word puzzle", level: 2 }),
   ).toBeVisible();
   await expect(page.getByLabel("Cipherword board and input")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "All Games" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Playable Games" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Continue Playing" })).toHaveCount(0);
 
   await page.getByLabel("Enter a Cipherword guess").fill("code");
@@ -152,7 +153,7 @@ test("plays Snake with keyboard, modes, restart, and touch swipe", async ({ page
 
   const board = page.getByLabel(/Snake board/i);
   await expect(board).toBeVisible();
-  await expect(page.getByRole("heading", { name: "All Games" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Playable Games" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Continue Playing" })).toHaveCount(0);
 
   const scrollState = await page.evaluate(() => ({
