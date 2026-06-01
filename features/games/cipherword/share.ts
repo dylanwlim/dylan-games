@@ -1,7 +1,7 @@
 import { getCipherwordDailyIndex } from "./dailyAnswers";
 import type { CipherwordRoundResult } from "./types";
 
-const routeUrl = "https://games.dylanwlim.com/games/cipherword";
+const routeUrl = "https://games.dylanwlim.com/games/cipher";
 
 const tierGlyphs: Record<string, string> = {
   "Ice cold": "[--]",
@@ -27,10 +27,10 @@ export function getShareText(result: CipherwordRoundResult) {
     .sort((left, right) => right.score - left.score)[0];
 
   return [
-    `Cipherword${number} — ${scoreLine}`,
+    `Cipher${number} — ${scoreLine}`,
     tiers.length ? tiers.join(" → ") : "No guesses",
     compactTiers,
-    best ? `Best clue: ${best.hint.toLowerCase()}` : "Best clue: solved",
+    best ? `Best hint: ${best.hint.toLowerCase()}` : "Best hint: solved",
     routeUrl,
   ].join("\n");
 }

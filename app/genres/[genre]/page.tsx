@@ -46,7 +46,7 @@ export default async function GenrePage({ params }: GenreRouteProps) {
   return (
     <GameHub
       key={genre}
-      initialSlug={genre === "word" ? "cipherword" : "snake"}
+      initialSlug={genre === "word" ? "cipher" : "snake"}
       initialGenre={genre}
       view="genre"
     />

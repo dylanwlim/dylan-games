@@ -92,11 +92,11 @@ export function useCipherwordGame() {
   const selectMode = useCallback(
     (mode: CipherwordMode) => {
       if (mode === "archive") {
-        router.push("/games/cipherword/archive" as Route);
+        router.push("/games/cipher/archive" as Route);
         return;
       }
 
-      const href = mode === "daily" ? "/games/cipherword" : `/games/cipherword?mode=${mode}`;
+      const href = mode === "daily" ? "/games/cipher" : `/games/cipher?mode=${mode}`;
       router.push(href as Route, { scroll: false });
     },
     [router],

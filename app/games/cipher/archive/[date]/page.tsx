@@ -1,14 +1,12 @@
 import { redirect } from "next/navigation";
 
-type CipherwordArchiveDatePageProps = {
+type CipherArchiveDatePageProps = {
   params: Promise<{
     date: string;
   }>;
 };
 
-export default async function CipherwordArchiveDatePage({
-  params,
-}: CipherwordArchiveDatePageProps) {
+export default async function CipherArchiveDatePage({ params }: CipherArchiveDatePageProps) {
   const { date } = await params;
 
   redirect(`/games/cipher?mode=archive&date=${date}`);

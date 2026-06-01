@@ -12,9 +12,9 @@ describe("game registry", () => {
   it("keeps playable games registered in launch order", () => {
     expect(playableGames).toHaveLength(2);
     expect(playableGames[0]?.slug).toBe("snake");
-    expect(playableGames[1]?.slug).toBe("cipherword");
+    expect(playableGames[1]?.slug).toBe("cipher");
     expect(getGameBySlug("snake")?.status).toBe("playable");
-    expect(getGameBySlug("cipherword")?.status).toBe("playable");
+    expect(getGameBySlug("cipher")?.status).toBe("playable");
   });
 
   it("keeps placeholder games visibly unavailable", () => {

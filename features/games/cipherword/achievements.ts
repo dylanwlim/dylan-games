@@ -1,5 +1,5 @@
 export const cipherwordAchievements = [
-  { id: "first-signal", name: "First Signal", condition: "Solve one Cipherword." },
+  { id: "first-signal", name: "First Signal", condition: "Solve one Cipher." },
   { id: "three-streak", name: "Three-Day Thread", condition: "Solve 3 daily puzzles in a row." },
   { id: "seven-streak", name: "Signal Week", condition: "Solve 7 daily puzzles in a row." },
   { id: "thirty-streak", name: "Monthly Cipher", condition: "Solve 30 daily puzzles in a row." },
@@ -25,7 +25,7 @@ export const cipherwordAchievements = [
   {
     id: "daily-return",
     name: "Back Tomorrow",
-    condition: "Open Cipherword on two consecutive days.",
+    condition: "Open Cipher on two consecutive days.",
   },
   { id: "time-traveler", name: "Time Traveler", condition: "Solve one archive puzzle." },
   { id: "backfill", name: "Backfill", condition: "Solve 7 archive puzzles." },

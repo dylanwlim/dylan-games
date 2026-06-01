@@ -93,6 +93,18 @@ describe("cipherword engine", () => {
     expect(solved.status).toBe("won");
   });
 
+  it("rejects phrase and non-letter guesses without consuming attempts", () => {
+    const puzzle = getCipherwordPuzzleForAnswer("cipher");
+    const base = testRound(puzzle);
+    const phrase = submitCipherwordGuess(base, "secret code");
+    const symbol = submitCipherwordGuess(base, "code2");
+
+    expect(phrase.error).toBe("Use one word only.");
+    expect(symbol.error).toBe("Use letters only.");
+    expect(phrase.guesses).toHaveLength(0);
+    expect(symbol.guesses).toHaveLength(0);
+  });
+
   it("sets loss state when guesses run out", () => {
     const puzzle = getCipherwordPuzzleForAnswer("cipher");
     const round = testRound(puzzle, 1);
@@ -144,7 +156,7 @@ describe("cipherword engine", () => {
     const share = getShareText(toCipherwordRoundResult(round)).toLowerCase();
 
     expect(share).not.toContain("signal");
-    expect(share).toContain("cipherword");
+    expect(share).toContain("cipher");
   });
 });
 

@@ -6,10 +6,19 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-01: Renamed the playable word game from Cipherword to Cipher across
+  visible hub, game, archive, share, and test surfaces. `/games/cipher` is now
+  the primary route, with `/games/cipherword` and old archive URLs redirecting
+  for compatibility. The active play screen was rebuilt around the game loop:
+  compact header, mode descriptions, clue strip, hidden answer tiles, seven
+  persistent guess slots, best-score meaning meter, contextual one-word input,
+  compact clue/progress side panel, settings disclosure, and a How it works
+  modal. Verified with Browser interaction proof, desktop/phone Playwright
+  viewport checks, `npm run validate`, and a clean rerun of `npm run test:e2e`.
 - 2026-06-01: Reworked the games home storefront from the pasted issue list:
   the featured hero is now a Motion carousel with autoplay, pause, arrows, dots,
   progress, swipe, keyboard controls, ARIA carousel structure, and treated
-  non-readable artwork; Continue Playing shows clearer Cipherword/Snake resume
+  non-readable artwork; Continue Playing shows clearer Cipher/Snake resume
   state; the live grid is now Playable Games; category chips focus on useful
   playable filters; and Coming Soon uses tighter, less repetitive preview
   cards. Verified Browser desktop rendering/navigation and `npm run validate`
@@ -22,13 +31,13 @@ that changes or verifies the project.
   Prettier checks, TypeScript, Browser rapid-input smoke testing on
   `/games/snake`, the Snake Playwright test in desktop/mobile Chromium, and
   `npm run validate`.
-- 2026-06-01: Implemented Cipherword as the second playable game across the hub.
-  `/games/cipherword` now supports daily, archive, unlimited, hard, and zen
+- 2026-06-01: Implemented Cipher as the second playable game across the hub.
+  `/games/cipher` now supports daily, archive, unlimited, hard, and zen
   modes with local-only stats, streaks, completed puzzle state, achievements,
   share text, clue ladder, semantic warmth feedback, keyboard-friendly input,
-  and responsive desktop/mobile play. `/games/cipherword/archive` exposes
+  and responsive desktop/mobile play. `/games/cipher/archive` exposes
   past/today puzzles while keeping future cells locked, and `/games/word-forge`
-  redirects to Cipherword. The daily bank is sourced from the uploaded pack,
+  redirects to Cipher. The daily bank is sourced from the uploaded pack,
   starts on 2026-06-01 at index 0 in `America/New_York`, and validates as 8,980
   unique answers through 2050-12-31. Verified with `npm run cipherword:validate`,
   `npm run validate`, and Browser desktop/mobile spot checks.

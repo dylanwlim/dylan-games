@@ -32,7 +32,7 @@ export function DailyCipherwordCTA({ variant = "card" }: { variant?: DailyCipher
         setStreak(stats.daily.currentStreak);
         setGuessCount(
           Array.isArray(progress)
-            ? progress.filter((guess) => typeof guess === "string").slice(0, 6).length
+            ? progress.filter((guess) => typeof guess === "string").slice(0, 7).length
             : 0,
         );
       } catch {
@@ -48,10 +48,10 @@ export function DailyCipherwordCTA({ variant = "card" }: { variant?: DailyCipher
   const statusLine = solved
     ? "Solved today"
     : guessCount
-      ? `${guessCount}/6 guesses used`
-      : "Today’s puzzle not solved";
+      ? `${guessCount}/7 guesses used`
+      : "Today's puzzle not solved";
   const action = solved ? "Play Unlimited" : "Play";
-  const href = solved ? "/games/cipherword?mode=unlimited" : "/games/cipherword";
+  const href = solved ? "/games/cipher?mode=unlimited" : "/games/cipher";
 
   return (
     <m.article
@@ -67,7 +67,7 @@ export function DailyCipherwordCTA({ variant = "card" }: { variant?: DailyCipher
         <span>P</span>
       </span>
       <span className="cipherword-cta-copy">
-        <strong>Daily Cipherword</strong>
+        <strong>Daily Cipher</strong>
         <span>{statusLine}</span>
       </span>
       <span className="cipherword-cta-details">
@@ -87,7 +87,7 @@ export function DailyCipherwordCTA({ variant = "card" }: { variant?: DailyCipher
       <Link className="cipherword-cta-action" href={href as Route}>
         {action}
       </Link>
-      <Link className="cipherword-cta-archive" href={"/games/cipherword/archive" as Route}>
+      <Link className="cipherword-cta-archive" href={"/games/cipher/archive" as Route}>
         <CalendarDays aria-hidden="true" />
         Archive
       </Link>

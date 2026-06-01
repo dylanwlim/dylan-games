@@ -63,13 +63,13 @@ export function CipherwordArchive() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.24, ease: "easeOut" }}
       >
-        <Link className="secondary-action" href={"/games/cipherword" as Route}>
+        <Link className="secondary-action" href={"/games/cipher" as Route}>
           <ArrowLeft aria-hidden="true" />
-          Back to Cipherword
+          Back to Cipher
         </Link>
         <div>
           <p>Archive</p>
-          <h1>Cipherword Archive</h1>
+          <h1>Cipher Archive</h1>
           <span>Past and today are playable. Future cells stay locked and spoiler-free.</span>
         </div>
         <div className="cipherword-archive-actions">
@@ -80,7 +80,7 @@ export function CipherwordArchive() {
           {randomUnsolved ? (
             <Link
               className="primary-action"
-              href={`/games/cipherword?mode=archive&date=${randomUnsolved.date}` as Route}
+              href={`/games/cipher?mode=archive&date=${randomUnsolved.date}` as Route}
             >
               <Shuffle aria-hidden="true" />
               Random unsolved
@@ -89,7 +89,7 @@ export function CipherwordArchive() {
         </div>
       </m.section>
 
-      <section className="cipherword-archive-panel" aria-label="Cipherword archive calendar">
+      <section className="cipherword-archive-panel" aria-label="Cipher archive calendar">
         <div className="cipherword-archive-monthbar">
           <button type="button" className="secondary-action" onClick={() => moveMonth(-1)}>
             <ChevronLeft aria-hidden="true" />
@@ -141,8 +141,8 @@ export function CipherwordArchive() {
               <Link
                 key={entry.date}
                 className={`cipherword-archive-cell ${status}`}
-                href={`/games/cipherword?mode=archive&date=${entry.date}` as Route}
-                aria-label={`Play Cipherword archive ${label}`}
+                href={`/games/cipher?mode=archive&date=${entry.date}` as Route}
+                aria-label={`Play Cipher archive ${label}`}
               >
                 <strong>{entry.date.slice(-2)}</strong>
                 <small>{solved ? "Solved" : entry.status === "today" ? "Today" : "Open"}</small>

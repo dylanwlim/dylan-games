@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("renders the hub and launches the featured Cipherword game", async ({ page }) => {
+test("renders the hub and launches the featured Cipher game", async ({ page }) => {
   await page.goto("/");
 
   await expect(page).toHaveTitle(/Dylan Games/);
@@ -28,19 +28,17 @@ test("renders the hub and launches the featured Cipherword game", async ({ page 
   await expect(page.getByText("Game Center")).toHaveCount(0);
   await expect(page.getByText("Get", { exact: true })).toHaveCount(0);
 
-  await page.getByRole("link", { name: "Play Cipherword from Featured" }).click();
-  await expect(page).toHaveURL(/\/games\/cipherword/);
-  await expect(
-    page.getByRole("heading", { name: "Daily semantic word puzzle", level: 2 }),
-  ).toBeVisible();
-  await expect(page.getByLabel("Cipherword board and input")).toBeVisible();
+  await page.getByRole("link", { name: "Play Cipher from Featured" }).click();
+  await expect(page).toHaveURL(/\/games\/cipher/);
+  await expect(page.getByRole("heading", { name: "Cipher", level: 2 })).toBeVisible();
+  await expect(page.getByLabel("Cipher board and input")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Playable Games" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Continue Playing" })).toHaveCount(0);
 
-  await page.getByLabel("Enter a Cipherword guess").fill("code");
+  await page.getByLabel("Enter a Cipher guess").fill("code");
   await page.getByRole("button", { name: "Guess" }).click();
   await expect(page.locator(".cipherword-feedback")).toContainText(
-    /Different neighborhood|Right broad domain|Close conceptually|Almost there/,
+    /Far from the answer|Warm|Hot|Very close|Burning/,
   );
 });
 
@@ -89,7 +87,7 @@ test("filters sidebar search by fuzzy game and category names", async ({ page })
   await expect(page.locator(".store-game-card", { hasText: "Minesweeper" })).toHaveCount(0);
 
   await search.fill("semantic");
-  await expect(page.locator('a.store-game-card[href="/games/cipherword"]')).toBeVisible();
+  await expect(page.locator('a.store-game-card[href="/games/cipher"]')).toBeVisible();
 });
 
 test("opens Snake from every Snake entry point", async ({ page }) => {
@@ -120,32 +118,32 @@ test("opens Snake from every Snake entry point", async ({ page }) => {
   await expect(page.getByLabel(/Snake board/i)).toBeVisible();
 });
 
-test("opens Cipherword from every Cipherword entry point", async ({ page }) => {
+test("opens Cipher from every Cipher entry point", async ({ page }) => {
   await page.goto("/");
 
-  await page.getByRole("link", { name: "Play Cipherword from Featured" }).click();
-  await expect(page).toHaveURL(/\/games\/cipherword/);
-  await expect(page.getByLabel("Cipherword board and input")).toBeVisible();
+  await page.getByRole("link", { name: "Play Cipher from Featured" }).click();
+  await expect(page).toHaveURL(/\/games\/cipher/);
+  await expect(page.getByLabel("Cipher board and input")).toBeVisible();
 
   await page.goto("/");
-  await page.locator('a.store-game-card[href="/games/cipherword"]').click();
-  await expect(page).toHaveURL(/\/games\/cipherword/);
+  await page.locator('a.store-game-card[href="/games/cipher"]').click();
+  await expect(page).toHaveURL(/\/games\/cipher/);
 
   await page.goto("/games/favorites");
-  await page.locator('a.collection-primary-action[href="/games/cipherword"]').click();
-  await expect(page).toHaveURL(/\/games\/cipherword/);
+  await page.locator('a.collection-primary-action[href="/games/cipher"]').click();
+  await expect(page).toHaveURL(/\/games\/cipher/);
 
   await page.goto("/games/favorites");
-  await page.locator('a.template-game-card[href="/games/cipherword"]').click();
-  await expect(page).toHaveURL(/\/games\/cipherword/);
+  await page.locator('a.template-game-card[href="/games/cipher"]').click();
+  await expect(page).toHaveURL(/\/games\/cipher/);
 
   await page.goto("/genres/word");
-  await page.locator('a.template-game-card[href="/games/cipherword"]').click();
-  await expect(page).toHaveURL(/\/games\/cipherword/);
+  await page.locator('a.template-game-card[href="/games/cipher"]').click();
+  await expect(page).toHaveURL(/\/games\/cipher/);
 
   await page.goto("/discover");
-  await page.locator('a.template-game-card[href="/games/cipherword"]').click();
-  await expect(page).toHaveURL(/\/games\/cipherword/);
+  await page.locator('a.template-game-card[href="/games/cipher"]').click();
+  await expect(page).toHaveURL(/\/games\/cipher/);
 });
 
 test("plays Snake with keyboard, modes, restart, and touch swipe", async ({ page }) => {
@@ -211,23 +209,21 @@ test("switches to a placeholder game with a finished unavailable state", async (
   await expect(page.getByRole("heading", { name: "Snake", level: 2 })).toBeVisible();
 });
 
-test("plays Cipherword daily and opens archive", async ({ page }) => {
-  await page.goto("/games/cipherword");
+test("plays Cipher daily and opens archive", async ({ page }) => {
+  await page.goto("/games/cipher");
 
-  await expect(page.getByLabel("Cipherword board and input")).toBeVisible();
-  await page.getByLabel("Enter a Cipherword guess").fill("cipher");
+  await expect(page.getByLabel("Cipher board and input")).toBeVisible();
+  await page.getByLabel("Enter a Cipher guess").fill("cipher");
   await page.getByRole("button", { name: "Guess" }).click();
   await expect(page.getByRole("dialog", { name: "cipher" })).toBeVisible();
   await expect(page.getByRole("button", { name: /Share|Copied/ })).toBeVisible();
 
-  await page.goto("/games/cipherword/archive");
-  await expect(page.getByRole("heading", { name: "Cipherword Archive" })).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: /Play Cipherword archive 2026-06-01/ }),
-  ).toBeVisible();
+  await page.goto("/games/cipher/archive");
+  await expect(page.getByRole("heading", { name: "Cipher Archive" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Play Cipher archive 2026-06-01/ })).toBeVisible();
 
   await page.goto("/games/word-forge");
-  await expect(page).toHaveURL(/\/games\/cipherword/);
+  await expect(page).toHaveURL(/\/games\/cipher/);
 });
 
 test("renders discover and genre pages", async ({ page }) => {

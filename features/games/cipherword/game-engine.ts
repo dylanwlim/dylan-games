@@ -118,6 +118,14 @@ export function submitCipherwordGuess(
     return withError(state, "Enter a guess first.");
   }
 
+  if (displayGuess.includes(" ")) {
+    return withError(state, "Use one word only.");
+  }
+
+  if (!/^[a-z]+$/.test(normalizedGuess)) {
+    return withError(state, "Use letters only.");
+  }
+
   if (normalizedGuess.length < 2) {
     return withError(state, "Use at least two letters.");
   }
@@ -163,9 +171,9 @@ export function submitCipherwordGuess(
     status: terminalStatus,
     error: undefined,
     message: isExact
-      ? "Signal found."
+      ? "Solved. Come back tomorrow or play Unlimited."
       : terminalStatus === "lost"
-        ? "Signal lost. Reveal unlocked."
+        ? "Out of guesses. Answer revealed."
         : guess.hint,
     finishedAt: terminalStatus === "playing" ? undefined : now.toISOString(),
   };
@@ -263,11 +271,13 @@ function getNewestUnlockedClue(state: CipherwordRoundState) {
 
 function getClueLadder(puzzle: CipherwordPuzzle): CipherwordClue[] {
   const shape = getAnswerShape(puzzle.answer);
+  const letterCount = getNormalizedLetterCount(puzzle.answer);
   const first = normalizeAnswer(puzzle.answer).slice(0, 1).toUpperCase();
   const last = normalizeAnswer(puzzle.answer).slice(-1).toUpperCase();
+  const category = getClueCategoryLabel(puzzle);
   const custom = puzzle.clueLadder ?? [];
   const defaults = [
-    `Shape ${shape}; category ${formatCategory(puzzle.category)}.`,
+    `${letterCount} letters. Category: ${category}.`,
     custom[0] ?? `Broad domain: ${puzzle.tags.slice(0, 2).join(" and ")}.`,
     custom[1] ?? `Often near: ${puzzle.near.slice(0, 2).join(", ")}.`,
     custom[2] ?? "Use your closest guess: move toward the shared idea, not just the letters.",
@@ -276,13 +286,30 @@ function getClueLadder(puzzle: CipherwordPuzzle): CipherwordClue[] {
     custom[5] ?? puzzle.definition,
   ];
 
+  const labels = [
+    "Start",
+    "After guess 1",
+    "After guess 2",
+    "After guess 3",
+    "First letter",
+    shape.includes("+") ? "Word pattern" : "Edge letters",
+    "Final clue",
+  ];
+
   return defaults.map((text, index) => ({
     id: `clue-${index + 1}`,
-    label: index === 0 ? "Start" : `Clue ${index}`,
+    label: labels[index] ?? `Clue ${index}`,
     text,
   }));
 }
 
 function formatCategory(category: string) {
   return category.slice(0, 1).toUpperCase() + category.slice(1);
+}
+
+function getClueCategoryLabel(puzzle: CipherwordPuzzle) {
+  if (normalizeAnswer(puzzle.answer) === "cipher") return "Codes";
+  if (puzzle.category === "language") return "Language & codes";
+
+  return formatCategory(puzzle.category);
 }

@@ -4209,6 +4209,590 @@ img {
   font: inherit;
 }
 
+.cipherword-game {
+  --cipher-panel: rgba(255, 255, 255, 0.96);
+  --cipher-surface: #ffffff;
+  --cipher-soft: #f3f6fb;
+  --cipher-line: rgba(15, 23, 42, 0.11);
+  --cipher-ink: #131722;
+  --cipher-muted: #4f5b73;
+  --cipher-blue: #1769e0;
+  --cipher-navy: #111827;
+  --cipher-amber: #f3b83f;
+  --cipher-green: #149557;
+  --cipher-violet: #7257ff;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 9px;
+}
+
+.cipherword-toolbar {
+  gap: 16px;
+}
+
+.cipherword-toolbar p {
+  margin-bottom: 3px;
+  color: var(--cipher-blue);
+  letter-spacing: 0;
+}
+
+.cipherword-toolbar h2 {
+  font-size: clamp(1.42rem, 2.25vw, 2.35rem);
+  letter-spacing: 0;
+}
+
+.cipherword-toolbar span {
+  margin-top: 3px;
+  color: var(--cipher-muted);
+  font-size: 0.88rem;
+}
+
+.cipherword-archive-link {
+  border-color: var(--cipher-line);
+  background: #ffffff;
+  color: var(--cipher-ink);
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.cipherword-archive-link:hover,
+.cipherword-archive-link:focus-visible {
+  border-color: rgba(23, 105, 224, 0.35);
+  color: var(--cipher-blue);
+  box-shadow: 0 10px 22px rgba(23, 105, 224, 0.1);
+  transform: translateY(-1px);
+}
+
+.cipherword-status-chip {
+  border-color: rgba(17, 24, 39, 0.12);
+  background: #edf4ff;
+  color: #1457b8;
+  text-transform: none;
+}
+
+.cipherword-status-chip.status-won {
+  border-color: rgba(20, 149, 87, 0.25);
+  background: #e7f7ef;
+  color: var(--cipher-green);
+}
+
+.cipherword-status-chip.status-lost {
+  border-color: rgba(180, 83, 9, 0.22);
+  background: #fff7e6;
+  color: #9a5b00;
+}
+
+.cipherword-mode-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #e9edf4;
+  padding: 4px;
+  scrollbar-width: none;
+}
+
+.cipherword-mode-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.cipherword-mode-tabs button {
+  min-width: 116px;
+  min-height: 36px;
+  cursor: pointer;
+}
+
+.cipherword-mode-tabs button.active,
+.cipherword-mode-tabs button[aria-selected="true"] {
+  background: #111827;
+  color: #ffffff;
+  box-shadow: 0 9px 24px rgba(17, 24, 39, 0.16);
+}
+
+.cipherword-shell {
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) minmax(270px, 320px);
+  gap: 12px;
+  min-height: min(690px, calc(100dvh - 225px));
+  overflow: hidden;
+}
+
+.cipherword-play-panel,
+.cipherword-side-panel {
+  border-radius: 20px;
+  background: var(--cipher-panel);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+}
+
+.cipherword-play-panel {
+  position: relative;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto auto;
+  gap: 8px;
+  overflow: hidden;
+  padding: 11px;
+}
+
+.cipherword-play-panel::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(rgba(23, 105, 224, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23, 105, 224, 0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
+  content: "";
+}
+
+.cipherword-clue-strip {
+  display: grid;
+  grid-template-columns: 1.25fr 0.76fr 0.94fr 0.76fr;
+  gap: 8px;
+}
+
+.cipherword-clue-strip > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+  border-radius: 12px;
+  background: #f7f9fd;
+  padding: 8px 9px;
+}
+
+.cipherword-clue-strip span,
+.cipherword-answer-label,
+.cipherword-row-summary > span,
+.cipherword-row-score span,
+.cipherword-latest-card span {
+  color: var(--cipher-muted);
+  font-size: 0.68rem;
+  font-weight: 760;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.cipherword-clue-strip strong {
+  color: var(--cipher-ink);
+  font-size: 0.86rem;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+
+.cipherword-answer-pattern {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(17, 24, 39, 0.98), rgba(24, 34, 55, 0.97)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 18px);
+  color: #ffffff;
+  padding: 10px 11px;
+}
+
+.cipherword-answer-label {
+  display: inline-flex;
+  grid-column: 1;
+  align-items: center;
+  gap: 7px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.cipherword-answer-label svg {
+  width: 15px;
+  height: 15px;
+  color: var(--cipher-amber);
+}
+
+.cipherword-answer-pattern > div {
+  display: flex;
+  grid-column: 2;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.cipherword-answer-group {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.cipherword-answer-tile {
+  display: grid;
+  width: 32px;
+  height: 35px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 820;
+  text-transform: uppercase;
+}
+
+.cipherword-answer-tile::after {
+  color: rgba(255, 255, 255, 0.36);
+  content: "_";
+}
+
+.cipherword-answer-tile.revealed {
+  border-color: rgba(243, 184, 63, 0.72);
+  background: rgba(243, 184, 63, 0.95);
+  color: #111827;
+}
+
+.cipherword-answer-tile.revealed::after {
+  content: "";
+}
+
+.cipherword-answer-pattern p {
+  display: none;
+  grid-column: 1 / -1;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.cipherword-board {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.cipherword-row {
+  flex: 0 0 auto;
+  grid-template-columns: minmax(0, 0.68fr) minmax(0, 1.32fr);
+  gap: 8px;
+  min-height: 35px;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 5px 8px;
+}
+
+.cipherword-row:not(.empty) {
+  min-height: 54px;
+}
+
+.cipherword-row.empty {
+  border-color: rgba(15, 23, 42, 0.08);
+  background: rgba(247, 249, 253, 0.72);
+  color: var(--cipher-muted);
+}
+
+.cipherword-row.empty:not(.current) .cipherword-row-summary p {
+  display: none;
+}
+
+.cipherword-row-summary {
+  gap: 2px;
+}
+
+.cipherword-row-summary strong {
+  color: var(--cipher-ink);
+  font-size: 0.88rem;
+  line-height: 1.08;
+}
+
+.cipherword-row-summary p {
+  display: none;
+}
+
+.cipherword-row-result {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(104px, 0.72fr) minmax(0, 1fr);
+  gap: 7px;
+  align-items: center;
+}
+
+.cipherword-row-result.ghost {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.cipherword-row-result.ghost span {
+  width: 34px;
+  height: 9px;
+  border-radius: 999px;
+  background: #e0e6ef;
+}
+
+.cipherword-row-score {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  justify-content: start;
+  gap: 2px 8px;
+}
+
+.cipherword-row-score strong {
+  color: var(--cipher-ink);
+  font-size: 0.76rem;
+}
+
+.cipherword-row-score i {
+  display: none;
+  overflow: hidden;
+  height: 5px;
+  border-radius: 999px;
+  background: #e2e7f0;
+}
+
+.cipherword-row-score i span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #607089 0%, #f3b83f 48%, #7257ff 100%);
+}
+
+.cipherword-tiles {
+  justify-content: end;
+  gap: 4px;
+}
+
+.cipherword-tile {
+  width: 25px;
+  height: 27px;
+  border-radius: 7px;
+  font-size: 0.72rem;
+}
+
+.cipherword-length-chip {
+  justify-self: end;
+  border-radius: 999px;
+  background: #eef3fb;
+  color: var(--cipher-muted);
+  padding: 6px 8px;
+  font-size: 0.68rem;
+  font-weight: 720;
+  text-align: right;
+}
+
+.cipherword-meter {
+  gap: 4px;
+  border-radius: 15px;
+  padding: 7px 10px;
+}
+
+.cipherword-meter-top {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.cipherword-meter-top span {
+  grid-column: 1 / -1;
+}
+
+.cipherword-meter-top strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cipherword-meter-track {
+  height: 8px;
+}
+
+.cipherword-meter-scale {
+  display: flex;
+  justify-content: space-between;
+  color: var(--cipher-muted);
+  font-size: 0.66rem;
+  font-weight: 650;
+}
+
+.cipherword-meter p {
+  font-size: 0.72rem;
+}
+
+.cipherword-meter p:not(.cipherword-latest-score) {
+  display: none;
+}
+
+.cipherword-latest-score {
+  font-weight: 700;
+}
+
+.cipherword-input-row {
+  align-items: center;
+}
+
+.cipherword-input-row input {
+  min-height: 44px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+}
+
+.cipherword-input-row input:focus-visible {
+  border-color: rgba(23, 105, 224, 0.58);
+  box-shadow: 0 0 0 3px rgba(23, 105, 224, 0.14);
+}
+
+.cipherword-input-row .primary-action {
+  min-height: 44px;
+  border-radius: 14px;
+}
+
+.cipherword-feedback,
+.cipherword-error {
+  min-height: 16px;
+  font-size: 0.8rem;
+}
+
+.cipherword-side-panel {
+  align-content: start;
+  max-height: 100%;
+  overflow: auto;
+  padding: 11px;
+}
+
+.cipherword-signal-trail,
+.cipherword-stats-panel,
+.cipherword-achievement-shelf {
+  gap: 8px;
+}
+
+.cipherword-panel-heading {
+  margin-bottom: 0;
+}
+
+.cipherword-closest-card,
+.cipherword-latest-card,
+.cipherword-clue-card,
+.cipherword-streak-panel,
+.cipherword-stats-panel,
+.cipherword-achievement-shelf,
+.cipherword-settings-panel {
+  border: 1px solid var(--cipher-line);
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.cipherword-closest-card {
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.98), rgba(23, 37, 60, 0.98));
+}
+
+.cipherword-latest-card {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+}
+
+.cipherword-latest-card strong {
+  color: var(--cipher-ink);
+  font-size: 0.9rem;
+}
+
+.cipherword-latest-card em {
+  color: var(--cipher-muted);
+  font-size: 0.76rem;
+  font-style: normal;
+  line-height: 1.28;
+}
+
+.cipherword-clue-card {
+  background: #f7f9fd;
+}
+
+.cipherword-clue-card span {
+  color: var(--cipher-blue);
+  letter-spacing: 0;
+}
+
+.cipherword-streak-panel {
+  grid-template-columns: auto repeat(3, minmax(58px, 1fr));
+  gap: 8px;
+  background: #ffffff;
+  color: var(--cipher-ink);
+  padding: 10px;
+}
+
+.cipherword-streak-panel > svg {
+  width: 22px;
+  height: 22px;
+}
+
+.cipherword-streak-panel span {
+  display: block;
+  color: var(--cipher-muted);
+  line-height: 1.1;
+}
+
+.cipherword-streak-panel strong {
+  display: block;
+  color: var(--cipher-ink);
+  line-height: 1.15;
+}
+
+.cipherword-achievement-list article {
+  border-radius: 10px;
+}
+
+.cipherword-settings-panel {
+  padding: 8px;
+}
+
+.cipherword-settings-panel summary {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 8px;
+  color: var(--cipher-ink);
+  font-size: 0.82rem;
+  font-weight: 760;
+  cursor: pointer;
+}
+
+.cipherword-settings-panel summary svg {
+  width: 16px;
+  height: 16px;
+  color: var(--cipher-blue);
+}
+
+.cipherword-settings-panel .secondary-action {
+  width: 100%;
+  min-height: 38px;
+  margin-top: 7px;
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  background: #f5f7fb;
+}
+
+.cipherword-howto-modal h2 {
+  font-size: clamp(1.7rem, 4vw, 2.65rem);
+}
+
+.cipherword-howto-steps {
+  display: grid;
+  gap: 8px;
+}
+
+.cipherword-howto-steps article {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--cipher-line);
+  border-radius: 12px;
+  background: #f7f9fd;
+  padding: 11px;
+}
+
+.cipherword-howto-steps strong {
+  color: var(--cipher-ink);
+}
+
+.cipherword-howto-steps span {
+  color: var(--cipher-muted);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
 .cipherword-archive-page {
   height: 100svh;
   min-height: 100svh;
@@ -5027,6 +5611,174 @@ img {
 
   .cipherword-archive-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 980px) {
+  .arcade-main.play-main:has(.cipherword-game) {
+    overflow-y: auto;
+  }
+
+  .arcade-main.play-main:has(.cipherword-game) .page-motion-shell,
+  .arcade-main.play-main:has(.cipherword-game) .play-page,
+  .arcade-main.play-main:has(.cipherword-game) .play-game-surface {
+    height: auto;
+    min-height: 100%;
+  }
+
+  .cipherword-game {
+    min-height: 0;
+  }
+
+  .cipherword-toolbar {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .cipherword-toolbar-actions {
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: 1px;
+    scrollbar-width: none;
+  }
+
+  .cipherword-toolbar-actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cipherword-mode-tabs {
+    display: flex;
+  }
+
+  .cipherword-mode-tabs button {
+    min-width: 104px;
+  }
+
+  .cipherword-shell {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    overflow: visible;
+    padding-right: 1px;
+  }
+
+  .cipherword-play-panel {
+    min-height: 790px;
+    grid-template-rows: auto auto minmax(348px, auto) auto auto auto;
+  }
+
+  .cipherword-side-panel {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .cipherword-clue-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cipherword-answer-pattern p {
+    display: block;
+  }
+
+  .cipherword-row {
+    grid-template-columns: 1fr;
+    gap: 7px;
+    align-items: start;
+  }
+
+  .cipherword-row-result {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .cipherword-row:not(.empty) {
+    min-height: 112px;
+  }
+
+  .cipherword-row:not(.empty) .cipherword-row-summary p {
+    display: none;
+  }
+
+  .cipherword-row-summary p {
+    white-space: normal;
+  }
+
+  .cipherword-row-score {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .cipherword-row-score i {
+    display: block;
+    grid-column: 1 / -1;
+  }
+
+  .cipherword-row.empty .cipherword-row-summary p,
+  .cipherword-row.empty .cipherword-row-result.ghost {
+    display: none;
+  }
+
+  .cipherword-board {
+    grid-auto-rows: auto;
+    overflow: visible;
+  }
+
+  .cipherword-tiles {
+    justify-content: start;
+  }
+
+  .cipherword-length-chip {
+    justify-self: start;
+  }
+
+  .cipherword-streak-panel {
+    grid-template-columns: auto repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .cipherword-toolbar h2 {
+    font-size: 1.28rem;
+  }
+
+  .cipherword-clue-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .cipherword-answer-tile {
+    width: 29px;
+    height: 34px;
+    border-radius: 7px;
+    font-size: 0.9rem;
+  }
+
+  .cipherword-answer-pattern p {
+    display: block;
+    font-size: 0.78rem;
+  }
+
+  .cipherword-play-panel {
+    min-height: 760px;
+    padding: 10px;
+  }
+
+  .cipherword-board {
+    grid-auto-rows: minmax(62px, auto);
+  }
+
+  .cipherword-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .cipherword-input-row .primary-action {
+    width: 100%;
+  }
+
+  .cipherword-meter-top {
+    grid-template-columns: 1fr;
+  }
+
+  .cipherword-streak-panel {
+    grid-template-columns: 1fr;
   }
 }
 

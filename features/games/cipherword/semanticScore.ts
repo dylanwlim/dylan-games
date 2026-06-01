@@ -213,11 +213,12 @@ function getLevenshteinDistance(source: string, target: string) {
 }
 
 function getHintForScore(score: number, directNear: boolean) {
-  if (score >= 85) return "Almost there. Letter logic should finish it.";
-  if (score >= 70) return directNear ? "Near miss. Adjust the angle." : "Near miss.";
-  if (score >= 55) return "Close conceptually; adjust the angle.";
-  if (score >= 40) return "Right broad domain; not the target idea.";
-  return "Different neighborhood.";
+  if (score >= 85) return "Burning. Try the exact word or use letter clues.";
+  if (score >= 70) return directNear ? "Very close. Adjust the angle." : "Very close.";
+  if (score >= 55) return "Hot. Same concept area; refine the idea.";
+  if (score >= 40) return "Warm. Related broad area, not the target word.";
+  if (score >= 20) return "Cold. Try a stronger connection to the clue category.";
+  return "Far from the answer's meaning. Try language, codes, writing, speech, or symbols.";
 }
 
 function getReasons({

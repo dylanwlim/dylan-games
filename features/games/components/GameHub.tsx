@@ -67,13 +67,13 @@ type GameHubProps = {
 };
 
 const gameComponents = {
-  cipherword: CipherwordGame,
+  cipher: CipherwordGame,
   snake: SnakeGame,
 } as const;
 
 const allGames: GameDefinition[] = games;
 const fallbackGame = allGames[0] as GameDefinition;
-const favoriteGameSlugs = ["cipherword", "snake", "minesweeper", "orbit"] as const;
+const favoriteGameSlugs = ["cipher", "snake", "minesweeper", "orbit"] as const;
 
 const genrePreviewArt: Partial<
   Record<GenreSlug, { accent: GameDefinition["accent"]; preview: GameDefinition["preview"] }>
@@ -129,7 +129,7 @@ const genrePageCopy: Partial<
   word: {
     description: "Daily word games built around clean typing, fair clues, and fast return rituals.",
     focus: "Daily meaning",
-    rhythm: "Cipherword leads the shelf with letters, semantic warmth, and archive play.",
+    rhythm: "Cipher leads the shelf with meaning scores, letter clues, and archive play.",
   },
 };
 
@@ -175,20 +175,20 @@ const featureAutoplayMs = 6200;
 
 const featuredGames: FeaturedGameSlide[] = [
   {
-    title: "Cipherword",
+    title: "Cipher",
     description: "Find the hidden concept using letters, meaning, and unlocked clues.",
     detail: "A daily word-logic puzzle built around meaning, clues, and deduction.",
     mode: "Today's Challenge",
     tags: ["Daily #001", "Word logic", "2-4 min"],
     image: "/art/feature-cipherword.svg",
     imagePosition: "center 54%",
-    route: "/games/cipherword" as Route,
+    route: "/games/cipher" as Route,
     primaryCta: "Play today's puzzle",
-    primaryAriaLabel: "Play Cipherword from Featured",
+    primaryAriaLabel: "Play Cipher from Featured",
     secondaryCta: {
       label: "View archive",
-      route: "/games/cipherword/archive" as Route,
-      ariaLabel: "View Cipherword archive from Featured",
+      route: "/games/cipher/archive" as Route,
+      ariaLabel: "View Cipher archive from Featured",
     },
     accent: "violet",
     preview: "cipherword",
@@ -1477,8 +1477,8 @@ function StoreGameCard({ game, source }: { game: GameDefinition; source: string 
   const summary =
     game.slug === "snake"
       ? "Guide the snake, chain apples, and beat your best run."
-      : game.slug === "cipherword"
-        ? "Solve the hidden concept with letters, clues, and meaning."
+      : game.slug === "cipher"
+        ? "Find the hidden word with meaning scores, clues, and letters."
         : isPlayable
           ? game.summary
           : getUpcomingDescription(game);
@@ -2116,15 +2116,15 @@ function getCollectionMeta(
       title: "Favorites",
       description:
         "A saved-games shelf for daily returns, starter picks, and the games most ready to revisit.",
-      href: "/games/cipherword",
-      action: "Play Cipherword",
+      href: "/games/cipher",
+      action: "Play Cipher",
       artLabel: "Favorite picks",
       shelfLabel: "Saved shelf",
       shelfTitle: "Favorite-ready games",
       panels: [
         {
           label: "Start",
-          title: "Cipherword is ready daily.",
+          title: "Cipher is ready daily.",
           body: "The daily word puzzle stays one click away while the playable shelf grows.",
         },
         {
@@ -2180,8 +2180,8 @@ function getCollectionMeta(
     title: "Discover",
     description:
       "A focused look at the games, genres, and release-ready structure behind Dylan Games.",
-    href: "/games/cipherword",
-    action: "Play Cipherword",
+    href: "/games/cipher",
+    action: "Play Cipher",
     artLabel: "Discover shelf",
     shelfLabel: "Library",
     shelfTitle: "Games to explore",

@@ -11,7 +11,7 @@ describe("game search", () => {
   it("matches games with likely misspellings", () => {
     expect(titlesFor("snkae")).toEqual(["Snake"]);
     expect(titlesFor("minesweepr")).toEqual(["Minesweeper"]);
-    expect(titlesFor("cipherwrod")).toEqual(["Cipherword"]);
+    expect(titlesFor("ciphr")).toEqual(["Cipher"]);
   });
 
   it("matches fuzzy category searches and returns the whole category", () => {
@@ -30,9 +30,9 @@ describe("game search", () => {
     );
   });
 
-  it("finds Cipherword by daily semantic archive language", () => {
-    expect(titlesFor("semantic")).toEqual(["Cipherword"]);
-    expect(titlesFor("archive")).toEqual(["Cipherword"]);
-    expect(titlesFor("wordle")).toEqual(["Cipherword"]);
+  it("finds Cipher by daily semantic archive language", () => {
+    expect(titlesFor("semantic")).toEqual(["Cipher"]);
+    expect(titlesFor("archive")).toEqual(["Cipher"]);
+    expect(titlesFor("wordle")).toEqual(["Cipher"]);
   });
 });
