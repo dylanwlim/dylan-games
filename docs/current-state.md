@@ -6,6 +6,11 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-01: Upgraded Snake from the starter loop into the canonical playable
+  implementation for the hub: deterministic Classic/Blitz/Zen modes, smooth
+  canvas interpolation, buffered keyboard input, swipe controls, pause/restart
+  states, per-mode best score and last-mode persistence, stronger unit coverage,
+  and broader Playwright coverage for Snake entry points.
 - 2026-06-01: Reworked only the existing sidebar motion system with
   Motion-driven collapsed/expanded width tweening, staggered label opacity/x
   reveal, fixed icon rail alignment, muted gray hover/active highlights with

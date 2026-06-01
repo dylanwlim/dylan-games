@@ -138,7 +138,7 @@ const featuredSpotlight = {
   summary: "Eat the next dot, grow the chain, and restart instantly when the route gets tight.",
   image: "/art/feature-snake.svg",
   gameSlug: "snake",
-  meta: ["Classic", "1 min rounds", "Playable"],
+  meta: ["Classic", "Blitz", "Zen"],
 } as const;
 
 const motionEase = [0.22, 1, 0.36, 1] as const;

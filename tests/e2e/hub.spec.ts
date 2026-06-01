@@ -30,11 +30,81 @@ test("renders the hub and launches Snake", async ({ page }) => {
   await page.getByRole("link", { name: "Play Snake from Featured" }).click();
   await expect(page).toHaveURL(/\/games\/snake/);
   await expect(page.getByRole("heading", { name: "Snake", level: 2 })).toBeVisible();
-  await expect(page.getByRole("img", { name: /Snake board/i })).toBeVisible();
+  await expect(page.getByLabel(/Snake board/i)).toBeVisible();
 
   await page.getByRole("button", { name: /Play Snake/i }).click();
   await page.keyboard.press("ArrowDown");
   await expect(page.getByText(/Snake status: Playing/i)).toBeAttached();
+});
+
+test("opens Snake from every Snake entry point", async ({ page }) => {
+  await page.goto("/");
+
+  if ((page.viewportSize()?.width ?? 0) >= 900) {
+    await page.getByRole("link", { name: "Open Snake details" }).click();
+    await expect(page).toHaveURL(/\/games\/snake/);
+    await expect(page.getByLabel(/Snake board/i)).toBeVisible();
+  }
+
+  await page.goto("/");
+  await page.getByRole("link", { name: "Resume Snake from Continue Playing" }).click();
+  await expect(page).toHaveURL(/\/games\/snake/);
+  await expect(page.getByRole("heading", { name: "Snake", level: 2 })).toBeVisible();
+
+  await page.goto("/");
+  await page.locator('a.store-game-card[href="/games/snake"]').click();
+  await expect(page).toHaveURL(/\/games\/snake/);
+  await expect(page.getByLabel(/Snake board/i)).toBeVisible();
+
+  await page.goto("/games/favorites");
+  await page.locator('a.collection-primary-action[href="/games/snake"]').click();
+  await expect(page).toHaveURL(/\/games\/snake/);
+  await expect(page.getByLabel(/Snake board/i)).toBeVisible();
+
+  await page.goto("/games/favorites");
+  await page.locator('a.template-game-card[href="/games/snake"]').click();
+  await expect(page).toHaveURL(/\/games\/snake/);
+  await expect(page.getByLabel(/Snake board/i)).toBeVisible();
+
+  await page.goto("/genres/action");
+  await page.locator('a.template-game-card[href="/games/snake"]').click();
+  await expect(page).toHaveURL(/\/games\/snake/);
+  await expect(page.getByLabel(/Snake board/i)).toBeVisible();
+
+  await page.goto("/discover");
+  await page.locator('a.template-game-card[href="/games/snake"]').click();
+  await expect(page).toHaveURL(/\/games\/snake/);
+  await expect(page.getByLabel(/Snake board/i)).toBeVisible();
+});
+
+test("plays Snake with keyboard, modes, restart, and touch swipe", async ({ page }) => {
+  await page.goto("/games/snake");
+
+  const board = page.getByLabel(/Snake board/i);
+  await expect(board).toBeVisible();
+  await page.getByRole("button", { name: "Blitz" }).click();
+  await page.getByRole("button", { name: "Play Snake" }).click();
+  await page.keyboard.press("KeyS");
+  await expect(page.getByText(/Snake status: Playing/i)).toBeAttached();
+
+  await page.keyboard.press("Space");
+  await expect(page.getByText(/Snake status: Paused/i)).toBeAttached();
+  await page.keyboard.press("Space");
+  await expect(page.getByText(/Snake status: Playing/i)).toBeAttached();
+
+  const box = await board.boundingBox();
+  expect(box).not.toBeNull();
+  if (box) {
+    const startX = box.x + box.width / 2;
+    const startY = box.y + box.height / 2;
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(startX + 70, startY, { steps: 4 });
+    await page.mouse.up();
+  }
+
+  await page.getByRole("button", { name: "Restart" }).last().click();
+  await expect(page.getByText(/Score 0/i)).toBeAttached();
 });
 
 test("switches to a placeholder game with a finished unavailable state", async ({ page }) => {

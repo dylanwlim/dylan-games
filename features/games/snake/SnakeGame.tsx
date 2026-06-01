@@ -1,23 +1,16 @@
 "use client";
 
-import { Pause, Play, RotateCcw } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Pause, Play, RotateCcw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import {
-  createSnakeState,
-  queueDirection,
-  setSnakeSpeed,
-  setSnakeStatus,
-  stepSnake,
-  type Direction,
-  type SnakeState,
+  directionFromDelta,
+  getRemainingMs,
+  getSnakeStatusLabel,
+  snakeModeDefinitions,
 } from "./snake-engine";
-
-const speedOptions = [
-  { label: "Calm", value: 150 },
-  { label: "Normal", value: 115 },
-  { label: "Fast", value: 82 },
-] as const;
+import { snakeModes, type Direction, type Point, type SnakeState } from "./snakeTypes";
+import { useSnakeGame } from "./useSnakeGame";
 
 const directionKeys: Record<string, Direction> = {
   ArrowUp: "up",
@@ -30,164 +23,90 @@ const directionKeys: Record<string, Direction> = {
   KeyA: "left",
 };
 
-const bestScoreKey = "dylan-games:snake-best";
+const directionControls = [
+  { direction: "up", label: "Move up", Icon: ArrowUp },
+  { direction: "left", label: "Move left", Icon: ArrowLeft },
+  { direction: "right", label: "Move right", Icon: ArrowRight },
+  { direction: "down", label: "Move down", Icon: ArrowDown },
+] satisfies Array<{ direction: Direction; label: string; Icon: typeof ArrowUp }>;
 
-type SnakeViewState = {
-  game: SnakeState;
-  bestScore: number;
+type PointerStart = {
+  pointerId: number;
+  x: number;
+  y: number;
 };
 
 export function SnakeGame() {
-  const [viewState, setViewState] = useState<SnakeViewState>(() => ({
-    game: createSnakeState(),
-    bestScore: 0,
-  }));
+  const { state, stateRef, bestScore, modeDefinition, actions } = useSnakeGame();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const state = viewState.game;
-  const bestScore = viewState.bestScore;
-  const stateRef = useRef(state);
+  const boardRef = useRef<HTMLDivElement | null>(null);
   const animationRef = useRef<number | null>(null);
   const lastFrameRef = useRef(0);
-  const accumulatorRef = useRef(0);
-  const bestScoreLoadedRef = useRef(false);
+  const moveAccumulatorRef = useRef(0);
+  const clockAccumulatorRef = useRef(0);
+  const pointerStartRef = useRef<PointerStart | null>(null);
+  const statusLabel = getSnakeStatusLabel(state.status);
+  const remainingMs = getRemainingMs(state);
+  const speedLabel = `${(1000 / state.speedMs).toFixed(1)} cells/s`;
+  const primaryActionLabel =
+    state.status === "game-over" ? "Restart" : state.status === "playing" ? "Pause" : "Play";
+  const overlayCopy = useMemo(() => getOverlayCopy(state), [state]);
 
-  const updateGame = useCallback((updater: (previousState: SnakeState) => SnakeState) => {
-    setViewState((previousViewState) => {
-      const game = updater(previousViewState.game);
-
-      return {
-        game,
-        bestScore: Math.max(previousViewState.bestScore, game.score),
-      };
-    });
-  }, []);
-
-  useEffect(() => {
-    stateRef.current = state;
-  }, [state]);
-
-  useEffect(() => {
-    if (!bestScoreLoadedRef.current) {
-      return;
-    }
-
-    window.localStorage.setItem(bestScoreKey, String(bestScore));
-  }, [bestScore]);
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      const storedBest = Number(window.localStorage.getItem(bestScoreKey));
-      bestScoreLoadedRef.current = true;
-
-      if (Number.isFinite(storedBest)) {
-        setViewState((previousViewState) => ({
-          ...previousViewState,
-          bestScore: Math.max(previousViewState.bestScore, storedBest),
-        }));
+  const handleKeyboardInput = useCallback(
+    (event: KeyboardEvent) => {
+      if (shouldIgnoreShortcut(event.target)) {
+        return;
       }
-    }, 0);
 
-    return () => window.clearTimeout(timeout);
-  }, []);
+      const direction = directionKeys[event.code];
 
-  const draw = useCallback(() => {
-    const canvas = canvasRef.current;
-
-    if (!canvas) {
-      return;
-    }
-
-    const context = canvas.getContext("2d");
-
-    if (!context) {
-      return;
-    }
-
-    const currentState = stateRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    const width = Math.max(1, Math.floor(rect.width * dpr));
-    const height = Math.max(1, Math.floor(rect.height * dpr));
-
-    if (canvas.width !== width || canvas.height !== height) {
-      canvas.width = width;
-      canvas.height = height;
-    }
-
-    context.clearRect(0, 0, width, height);
-    context.fillStyle = "#101926";
-    context.fillRect(0, 0, width, height);
-
-    const padding = 22 * dpr;
-    const boardPixels = Math.min(width - padding * 2, height - padding * 2);
-    const cellSize = boardPixels / currentState.boardSize;
-    const originX = (width - boardPixels) / 2;
-    const originY = (height - boardPixels) / 2;
-
-    context.strokeStyle = "rgba(255, 255, 255, 0.045)";
-    context.lineWidth = 1 * dpr;
-
-    for (let index = 0; index <= currentState.boardSize; index += 1) {
-      const position = originX + index * cellSize;
-      context.beginPath();
-      context.moveTo(position, originY);
-      context.lineTo(position, originY + boardPixels);
-      context.stroke();
-
-      const yPosition = originY + index * cellSize;
-      context.beginPath();
-      context.moveTo(originX, yPosition);
-      context.lineTo(originX + boardPixels, yPosition);
-      context.stroke();
-    }
-
-    currentState.snake.forEach((point, index) => {
-      const radius = Math.max(4 * dpr, cellSize * 0.22);
-      const x = originX + point.x * cellSize + cellSize * 0.12;
-      const y = originY + point.y * cellSize + cellSize * 0.12;
-      const size = cellSize * 0.76;
-
-      context.fillStyle = index === 0 ? "#9bea82" : "#76d66f";
-      roundedRect(context, x, y, size, size, radius);
-      context.fill();
-
-      if (index === 0) {
-        context.fillStyle = "#101926";
-        context.beginPath();
-        context.arc(
-          x + size * 0.34,
-          y + size * 0.42,
-          Math.max(1.8 * dpr, size * 0.07),
-          0,
-          Math.PI * 2,
-        );
-        context.arc(
-          x + size * 0.66,
-          y + size * 0.42,
-          Math.max(1.8 * dpr, size * 0.07),
-          0,
-          Math.PI * 2,
-        );
-        context.fill();
+      if (direction) {
+        event.preventDefault();
+        actions.queueMove(direction);
+        return;
       }
-    });
 
-    const foodSize = cellSize * 0.58;
-    const foodX = originX + currentState.food.x * cellSize + (cellSize - foodSize) / 2;
-    const foodY = originY + currentState.food.y * cellSize + (cellSize - foodSize) / 2;
-    context.fillStyle = "#ff776d";
-    roundedRect(context, foodX, foodY, foodSize, foodSize, Math.max(4 * dpr, foodSize * 0.22));
-    context.fill();
+      if (event.code === "Space") {
+        event.preventDefault();
+        actions.togglePlay();
+        return;
+      }
 
-    if (currentState.status === "lost") {
-      context.fillStyle = "rgba(16, 25, 38, 0.72)";
-      context.fillRect(0, 0, width, height);
-      context.fillStyle = "#f7f8fb";
-      context.font = `${22 * dpr}px ${getComputedStyle(document.body).fontFamily}`;
-      context.textAlign = "center";
-      context.fillText("Round over", width / 2, height / 2);
-    }
-  }, []);
+      if (event.code === "Enter" && stateRef.current.status === "game-over") {
+        event.preventDefault();
+        actions.restart();
+        return;
+      }
+
+      if (event.code === "Escape") {
+        event.preventDefault();
+        actions.pause();
+      }
+    },
+    [actions, stateRef],
+  );
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyboardInput);
+
+    return () => window.removeEventListener("keydown", handleKeyboardInput);
+  }, [handleKeyboardInput]);
+
+  useEffect(() => {
+    const pauseWhenHidden = () => {
+      if (document.hidden) {
+        actions.pause();
+      }
+    };
+
+    window.addEventListener("blur", actions.pause);
+    document.addEventListener("visibilitychange", pauseWhenHidden);
+
+    return () => {
+      window.removeEventListener("blur", actions.pause);
+      document.removeEventListener("visibilitychange", pauseWhenHidden);
+    };
+  }, [actions]);
 
   useEffect(() => {
     const loop = (timestamp: number) => {
@@ -195,17 +114,45 @@ export function SnakeGame() {
         lastFrameRef.current = timestamp;
       }
 
-      const delta = timestamp - lastFrameRef.current;
+      const delta = Math.min(80, timestamp - lastFrameRef.current);
       lastFrameRef.current = timestamp;
-      accumulatorRef.current += delta;
-
       const currentState = stateRef.current;
-      if (currentState.status === "playing" && accumulatorRef.current >= currentState.speedMs) {
-        updateGame((previousState) => stepSnake(previousState));
-        accumulatorRef.current = 0;
+
+      if (currentState.status === "playing") {
+        moveAccumulatorRef.current += delta;
+        clockAccumulatorRef.current += delta;
+
+        const shouldStep = moveAccumulatorRef.current >= currentState.speedMs;
+        const shouldSyncClock =
+          clockAccumulatorRef.current >= 100 ||
+          (currentState.durationMs !== null &&
+            currentState.durationMs - currentState.elapsedMs <= clockAccumulatorRef.current);
+
+        if (shouldStep || shouldSyncClock) {
+          const clockDeltaMs = shouldSyncClock ? clockAccumulatorRef.current : 0;
+
+          if (shouldStep) {
+            moveAccumulatorRef.current = 0;
+          }
+
+          if (shouldSyncClock) {
+            clockAccumulatorRef.current = 0;
+          }
+
+          actions.advanceFrame({ clockDeltaMs, shouldStep });
+        }
+      } else {
+        moveAccumulatorRef.current = 0;
+        clockAccumulatorRef.current = 0;
       }
 
-      draw();
+      const drawState = stateRef.current;
+      const progress =
+        drawState.status === "playing"
+          ? Math.min(1, moveAccumulatorRef.current / drawState.speedMs)
+          : 1;
+
+      drawSnakeBoard(canvasRef.current, drawState, progress, timestamp);
       animationRef.current = window.requestAnimationFrame(loop);
     };
 
@@ -215,143 +162,429 @@ export function SnakeGame() {
       if (animationRef.current !== null) {
         window.cancelAnimationFrame(animationRef.current);
       }
+
+      animationRef.current = null;
+      lastFrameRef.current = 0;
     };
-  }, [draw, updateGame]);
+  }, [actions, stateRef]);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const direction = directionKeys[event.code];
-
-      if (direction) {
-        event.preventDefault();
-        updateGame((previousState) => queueDirection(previousState, direction));
-        return;
-      }
-
-      if (event.code === "Space") {
-        event.preventDefault();
-        updateGame((previousState) =>
-          setSnakeStatus(previousState, previousState.status === "playing" ? "paused" : "playing"),
-        );
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [updateGame]);
-
-  const statusLabel = useMemo(() => {
-    if (state.status === "ready") {
-      return "Ready";
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "mouse" && event.button !== 0) {
+      return;
     }
 
-    if (state.status === "lost") {
-      return "Round over";
+    if (event.target instanceof Element && event.target.closest("button")) {
+      return;
     }
 
-    return state.status === "paused" ? "Paused" : "Playing";
-  }, [state.status]);
-
-  const togglePlay = () => {
-    updateGame((previousState) =>
-      setSnakeStatus(previousState, previousState.status === "playing" ? "paused" : "playing"),
-    );
+    boardRef.current?.focus({ preventScroll: true });
+    event.currentTarget.setPointerCapture(event.pointerId);
+    pointerStartRef.current = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+    };
   };
 
-  const reset = () => {
-    updateGame(() => createSnakeState({ speedMs: state.speedMs }));
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (pointerStartRef.current) {
+      event.preventDefault();
+    }
+  };
+
+  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    const pointerStart = pointerStartRef.current;
+
+    if (!pointerStart || pointerStart.pointerId !== event.pointerId) {
+      return;
+    }
+
+    event.preventDefault();
+    pointerStartRef.current = null;
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    const direction = directionFromDelta(
+      event.clientX - pointerStart.x,
+      event.clientY - pointerStart.y,
+    );
+
+    if (direction) {
+      actions.queueMove(direction);
+    }
   };
 
   return (
-    <section className="snake-game" aria-label="Snake game">
-      <div className="snake-canvas-shell">
-        <canvas
-          ref={canvasRef}
-          className="snake-canvas"
-          aria-label={`Snake board. ${statusLabel}. Score ${state.score}.`}
-          role="img"
-        />
-        <button
-          className="canvas-control"
-          type="button"
-          onClick={togglePlay}
-          aria-label={state.status === "playing" ? "Pause Snake" : "Play Snake"}
-        >
-          {state.status === "playing" ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
-        </button>
-        <div className="canvas-score" aria-hidden="true">
-          {state.score}
+    <section className={`snake-game mode-${state.mode}`} aria-label="Snake game">
+      <div className="snake-toolbar">
+        <div>
+          <p>{modeDefinition.label}</p>
+          <h3>A polished arcade classic rebuilt for smooth browser play.</h3>
+          <span>Use arrows, WASD, or swipe.</span>
+        </div>
+        <div className="snake-mode-tabs" aria-label="Snake modes">
+          {snakeModes.map((mode) => (
+            <button
+              key={mode}
+              className={state.mode === mode ? "active" : ""}
+              type="button"
+              aria-pressed={state.mode === mode}
+              onClick={() => actions.selectMode(mode)}
+            >
+              {snakeModeDefinitions[mode].label}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="snake-controls" aria-label="Snake controls">
-        <div className="metric">
-          <span>Score</span>
-          <strong>{state.score}</strong>
-        </div>
-        <div className="metric">
-          <span>Best</span>
-          <strong>{bestScore}</strong>
-        </div>
-        <label className="speed-control">
-          <span>Speed</span>
-          <select
-            value={state.speedMs}
-            onChange={(event) =>
-              updateGame((previousState) =>
-                setSnakeSpeed(previousState, Number(event.target.value)),
-              )
-            }
+      <div className="snake-game-shell">
+        <div
+          ref={boardRef}
+          className={`snake-canvas-shell status-${state.status}`}
+          role="application"
+          tabIndex={0}
+          aria-label={`Snake board. ${statusLabel}. Score ${state.score}. Best ${bestScore}.`}
+          onPointerCancel={() => {
+            pointerStartRef.current = null;
+          }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerEnd}
+        >
+          <canvas ref={canvasRef} className="snake-canvas" aria-hidden="true" />
+          <button
+            className="canvas-control"
+            type="button"
+            onClick={state.status === "game-over" ? actions.restart : actions.togglePlay}
+            aria-label={`${primaryActionLabel} Snake`}
           >
-            {speedOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button className="primary-action" type="button" onClick={reset}>
-          <RotateCcw aria-hidden="true" />
-          New Game
-        </button>
+            {state.status === "playing" ? (
+              <Pause aria-hidden="true" />
+            ) : state.status === "game-over" ? (
+              <RotateCcw aria-hidden="true" />
+            ) : (
+              <Play aria-hidden="true" />
+            )}
+          </button>
+          <div className="canvas-score" aria-hidden="true">
+            {state.score}
+          </div>
+          {state.status !== "playing" ? (
+            <div className="snake-state-overlay">
+              <p>{statusLabel}</p>
+              <strong>{overlayCopy.title}</strong>
+              <span>{overlayCopy.body}</span>
+              <button
+                className="primary-action"
+                type="button"
+                onClick={state.status === "game-over" ? actions.restart : actions.togglePlay}
+              >
+                {state.status === "game-over" ? (
+                  <RotateCcw aria-hidden="true" />
+                ) : (
+                  <Play aria-hidden="true" />
+                )}
+                {primaryActionLabel}
+              </button>
+            </div>
+          ) : null}
+        </div>
+
+        <aside className="snake-side-panel" aria-label="Snake stats and actions">
+          <div className="snake-stats">
+            <Metric label="Score" value={String(state.score)} />
+            <Metric label="Best" value={String(bestScore)} />
+            <Metric label="Length" value={String(state.snake.length)} />
+            <Metric label="Speed" value={speedLabel} />
+            <Metric label="Mode" value={modeDefinition.label} />
+            <Metric
+              label={state.mode === "blitz" ? "Time" : "Status"}
+              value={remainingMs === null ? statusLabel : formatTime(remainingMs)}
+            />
+          </div>
+
+          <div className="snake-actions">
+            <button
+              className="primary-action"
+              type="button"
+              onClick={state.status === "game-over" ? actions.restart : actions.togglePlay}
+            >
+              {state.status === "playing" ? (
+                <Pause aria-hidden="true" />
+              ) : state.status === "game-over" ? (
+                <RotateCcw aria-hidden="true" />
+              ) : (
+                <Play aria-hidden="true" />
+              )}
+              {primaryActionLabel}
+            </button>
+            <button className="secondary-action" type="button" onClick={actions.restart}>
+              <RotateCcw aria-hidden="true" />
+              Restart
+            </button>
+          </div>
+
+          <p className="snake-hint">{modeDefinition.description}</p>
+        </aside>
       </div>
 
       <div className="touch-pad" aria-label="Touch direction controls">
-        <button
-          type="button"
-          aria-label="Move up"
-          onClick={() => updateGame((previousState) => queueDirection(previousState, "up"))}
-        >
-          Up
-        </button>
-        <button
-          type="button"
-          aria-label="Move left"
-          onClick={() => updateGame((previousState) => queueDirection(previousState, "left"))}
-        >
-          Left
-        </button>
-        <button
-          type="button"
-          aria-label="Move right"
-          onClick={() => updateGame((previousState) => queueDirection(previousState, "right"))}
-        >
-          Right
-        </button>
-        <button
-          type="button"
-          aria-label="Move down"
-          onClick={() => updateGame((previousState) => queueDirection(previousState, "down"))}
-        >
-          Down
-        </button>
+        {directionControls.map(({ direction, label, Icon }) => (
+          <button
+            key={direction}
+            type="button"
+            aria-label={label}
+            onClick={() => actions.queueMove(direction)}
+          >
+            <Icon aria-hidden="true" />
+          </button>
+        ))}
       </div>
 
       <p className="sr-only" aria-live="polite">
-        Snake status: {statusLabel}. Score {state.score}. Best {bestScore}.
+        Snake status: {statusLabel}. Score {state.score}. Best {bestScore}. Length{" "}
+        {state.snake.length}. Speed {speedLabel}.
       </p>
     </section>
   );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="metric">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function getOverlayCopy(state: SnakeState) {
+  if (state.status === "game-over") {
+    if (state.lastEvent === "time-up") {
+      return {
+        title: "Time expired.",
+        body: "Restart instantly or switch modes for a different pace.",
+      };
+    }
+
+    if (state.lastEvent === "cleared") {
+      return {
+        title: "Board cleared.",
+        body: "Clean route. Start another round when ready.",
+      };
+    }
+
+    return {
+      title: "Game Over",
+      body: "Restart instantly, then buffer your next turn a little earlier.",
+    };
+  }
+
+  if (state.status === "paused") {
+    return {
+      title: "Paused",
+      body: "Space resumes. Escape pauses whenever the board is active.",
+    };
+  }
+
+  return {
+    title: "Snake",
+    body: "Use arrows, WASD, or swipe.",
+  };
+}
+
+function shouldIgnoreShortcut(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  return Boolean(target.closest("button, a, input, select, textarea, [contenteditable='true']"));
+}
+
+function formatTime(milliseconds: number) {
+  const totalSeconds = Math.ceil(milliseconds / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function drawSnakeBoard(
+  canvas: HTMLCanvasElement | null,
+  state: SnakeState,
+  progress: number,
+  timestamp: number,
+) {
+  if (!canvas) {
+    return;
+  }
+
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    return;
+  }
+
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const width = Math.max(1, Math.floor(rect.width * dpr));
+  const height = Math.max(1, Math.floor(rect.height * dpr));
+
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  context.clearRect(0, 0, width, height);
+  const boardGradient = context.createLinearGradient(0, 0, width, height);
+  boardGradient.addColorStop(0, "#101926");
+  boardGradient.addColorStop(1, "#0a111c");
+  context.fillStyle = boardGradient;
+  context.fillRect(0, 0, width, height);
+
+  const padding = Math.max(12 * dpr, Math.min(width, height) * 0.052);
+  const boardPixels = Math.max(1, Math.min(width - padding * 2, height - padding * 2));
+  const cellSize = boardPixels / state.boardSize;
+  const originX = (width - boardPixels) / 2;
+  const originY = (height - boardPixels) / 2;
+
+  drawGrid(context, state.boardSize, originX, originY, boardPixels, cellSize, dpr);
+  drawFood(context, state, originX, originY, cellSize, dpr, timestamp);
+  drawSnake(context, state, progress, originX, originY, cellSize, dpr);
+
+  if (state.status === "game-over") {
+    context.fillStyle = "rgba(5, 10, 17, 0.38)";
+    context.fillRect(0, 0, width, height);
+  }
+}
+
+function drawGrid(
+  context: CanvasRenderingContext2D,
+  boardSize: number,
+  originX: number,
+  originY: number,
+  boardPixels: number,
+  cellSize: number,
+  dpr: number,
+) {
+  context.save();
+  context.strokeStyle = "rgba(255, 255, 255, 0.052)";
+  context.lineWidth = 1 * dpr;
+
+  for (let index = 0; index <= boardSize; index += 1) {
+    const x = originX + index * cellSize;
+    const y = originY + index * cellSize;
+
+    context.beginPath();
+    context.moveTo(x, originY);
+    context.lineTo(x, originY + boardPixels);
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(originX, y);
+    context.lineTo(originX + boardPixels, y);
+    context.stroke();
+  }
+
+  context.strokeStyle = "rgba(255, 255, 255, 0.16)";
+  context.lineWidth = 1.5 * dpr;
+  roundedRect(context, originX, originY, boardPixels, boardPixels, 16 * dpr);
+  context.stroke();
+  context.restore();
+}
+
+function drawFood(
+  context: CanvasRenderingContext2D,
+  state: SnakeState,
+  originX: number,
+  originY: number,
+  cellSize: number,
+  dpr: number,
+  timestamp: number,
+) {
+  if (!state.food) {
+    return;
+  }
+
+  const pulse = 1 + Math.sin(timestamp / 170) * 0.08;
+  const foodSize = cellSize * 0.58 * pulse;
+  const foodX = originX + state.food.x * cellSize + (cellSize - foodSize) / 2;
+  const foodY = originY + state.food.y * cellSize + (cellSize - foodSize) / 2;
+
+  context.save();
+  context.shadowColor = "rgba(255, 119, 109, 0.42)";
+  context.shadowBlur = 16 * dpr;
+  context.fillStyle = "#ff776d";
+  roundedRect(context, foodX, foodY, foodSize, foodSize, Math.max(4 * dpr, foodSize * 0.28));
+  context.fill();
+  context.restore();
+}
+
+function drawSnake(
+  context: CanvasRenderingContext2D,
+  state: SnakeState,
+  progress: number,
+  originX: number,
+  originY: number,
+  cellSize: number,
+  dpr: number,
+) {
+  state.snake.forEach((point, index) => {
+    const previousPoint =
+      state.previousSnake[index] ?? state.previousSnake[state.previousSnake.length - 1] ?? point;
+    const drawPoint =
+      state.status === "playing" ? interpolatePoint(previousPoint, point, progress) : point;
+    const inset = cellSize * (index === 0 ? 0.1 : 0.15);
+    const size = cellSize - inset * 2;
+    const radius = Math.max(4 * dpr, size * 0.24);
+    const x = originX + drawPoint.x * cellSize + inset;
+    const y = originY + drawPoint.y * cellSize + inset;
+
+    context.save();
+    context.shadowColor = index === 0 ? "rgba(155, 234, 130, 0.25)" : "rgba(103, 201, 95, 0.16)";
+    context.shadowBlur = index === 0 ? 12 * dpr : 6 * dpr;
+    context.fillStyle = index === 0 ? "#9bea82" : blendSnakeColor(index, state.snake.length);
+    roundedRect(context, x, y, size, size, radius);
+    context.fill();
+
+    if (index === 0) {
+      drawSnakeEyes(context, x, y, size, dpr);
+    }
+
+    context.restore();
+  });
+}
+
+function blendSnakeColor(index: number, length: number) {
+  const ratio = length <= 1 ? 0 : index / Math.max(1, length - 1);
+  const green = Math.round(214 - ratio * 40);
+
+  return `rgb(118, ${green}, 111)`;
+}
+
+function drawSnakeEyes(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  dpr: number,
+) {
+  const eyeRadius = Math.max(1.7 * dpr, size * 0.07);
+
+  context.fillStyle = "#101926";
+  context.beginPath();
+  context.arc(x + size * 0.34, y + size * 0.42, eyeRadius, 0, Math.PI * 2);
+  context.arc(x + size * 0.66, y + size * 0.42, eyeRadius, 0, Math.PI * 2);
+  context.fill();
+}
+
+function interpolatePoint(from: Point, to: Point, progress: number): Point {
+  return {
+    x: from.x + (to.x - from.x) * progress,
+    y: from.y + (to.y - from.y) * progress,
+  };
 }
 
 function roundedRect(

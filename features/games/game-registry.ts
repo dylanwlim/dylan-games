@@ -6,9 +6,8 @@ export const games = [
     title: "Snake",
     genre: "Action",
     status: "playable",
-    summary: "Eat dots, grow the chain, and restart fast.",
-    description:
-      "A focused starter game with keyboard controls, touch controls, speed settings, and local best score.",
+    summary: "A polished arcade classic rebuilt for smooth browser play.",
+    description: "A polished arcade classic rebuilt for smooth browser play.",
     accent: "green",
     preview: "snake",
     priority: 1,
