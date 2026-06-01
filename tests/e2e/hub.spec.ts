@@ -31,8 +31,10 @@ test("renders the hub and launches Snake", async ({ page }) => {
   await expect(page).toHaveURL(/\/games\/snake/);
   await expect(page.getByRole("heading", { name: "Snake", level: 2 })).toBeVisible();
   await expect(page.getByLabel(/Snake board/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "All Games" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Continue Playing" })).toHaveCount(0);
 
-  await page.getByRole("button", { name: /Play Snake/i }).click();
+  await page.getByRole("button", { name: /Start Snake/i }).click();
   await page.keyboard.press("ArrowDown");
   await expect(page.getByText(/Snake status: Playing/i)).toBeAttached();
 });
@@ -82,8 +84,30 @@ test("plays Snake with keyboard, modes, restart, and touch swipe", async ({ page
 
   const board = page.getByLabel(/Snake board/i);
   await expect(board).toBeVisible();
-  await page.getByRole("button", { name: "Blitz" }).click();
-  await page.getByRole("button", { name: "Play Snake" }).click();
+  await expect(page.getByRole("heading", { name: "All Games" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Continue Playing" })).toHaveCount(0);
+
+  const scrollState = await page.evaluate(() => ({
+    bodyCanScroll: (document.scrollingElement?.scrollHeight ?? 0) > window.innerHeight + 1,
+    mainCanScroll:
+      (document.querySelector("main")?.scrollHeight ?? 0) >
+      (document.querySelector("main")?.clientHeight ?? 0) + 1,
+  }));
+  expect(scrollState.bodyCanScroll).toBe(false);
+  expect(scrollState.mainCanScroll).toBe(false);
+
+  const initialBox = await board.boundingBox();
+  expect(initialBox).not.toBeNull();
+  if (initialBox) {
+    const viewport = page.viewportSize();
+    expect(initialBox.x).toBeGreaterThanOrEqual(0);
+    expect(initialBox.y).toBeGreaterThanOrEqual(0);
+    expect(initialBox.x + initialBox.width).toBeLessThanOrEqual((viewport?.width ?? 0) + 1);
+    expect(initialBox.y + initialBox.height).toBeLessThanOrEqual((viewport?.height ?? 0) + 1);
+  }
+
+  await page.getByRole("tab", { name: "Blitz" }).click();
+  await page.getByRole("button", { name: "Start Snake" }).click();
   await page.keyboard.press("KeyS");
   await expect(page.getByText(/Snake status: Playing/i)).toBeAttached();
 
@@ -103,7 +127,7 @@ test("plays Snake with keyboard, modes, restart, and touch swipe", async ({ page
     await page.mouse.up();
   }
 
-  await page.getByRole("button", { name: "Restart" }).last().click();
+  await page.getByRole("button", { name: "Restart" }).click();
   await expect(page.getByText(/Score 0/i)).toBeAttached();
 });
 

@@ -1,6 +1,15 @@
 "use client";
 
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Pause, Play, RotateCcw } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  Maximize2,
+  Pause,
+  Play,
+  RotateCcw,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import {
@@ -36,7 +45,11 @@ type PointerStart = {
   y: number;
 };
 
-export function SnakeGame() {
+type SnakeGameProps = {
+  menuOpen?: boolean;
+};
+
+export function SnakeGame({ menuOpen = false }: SnakeGameProps) {
   const { state, stateRef, bestScore, modeDefinition, actions } = useSnakeGame();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const boardRef = useRef<HTMLDivElement | null>(null);
@@ -47,10 +60,35 @@ export function SnakeGame() {
   const pointerStartRef = useRef<PointerStart | null>(null);
   const statusLabel = getSnakeStatusLabel(state.status);
   const remainingMs = getRemainingMs(state);
-  const speedLabel = `${(1000 / state.speedMs).toFixed(1)} cells/s`;
+  const speedLabel = (1000 / state.speedMs).toFixed(1);
   const primaryActionLabel =
-    state.status === "game-over" ? "Restart" : state.status === "playing" ? "Pause" : "Play";
+    state.status === "game-over"
+      ? "Restart"
+      : state.status === "playing"
+        ? "Pause"
+        : state.status === "paused"
+          ? "Resume"
+          : "Start";
   const overlayCopy = useMemo(() => getOverlayCopy(state), [state]);
+
+  const focusBoard = useCallback(() => {
+    boardRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  const handlePrimaryAction = useCallback(() => {
+    if (stateRef.current.status === "game-over") {
+      actions.restart();
+    } else {
+      actions.togglePlay();
+    }
+
+    window.requestAnimationFrame(focusBoard);
+  }, [actions, focusBoard, stateRef]);
+
+  const handleRestart = useCallback(() => {
+    actions.restart();
+    window.requestAnimationFrame(focusBoard);
+  }, [actions, focusBoard]);
 
   const handleKeyboardInput = useCallback(
     (event: KeyboardEvent) => {
@@ -72,7 +110,16 @@ export function SnakeGame() {
         return;
       }
 
-      if (event.code === "Enter" && stateRef.current.status === "game-over") {
+      if (event.code === "KeyP") {
+        event.preventDefault();
+        actions.togglePlay();
+        return;
+      }
+
+      if (
+        event.code === "KeyR" ||
+        (event.code === "Enter" && stateRef.current.status === "game-over")
+      ) {
         event.preventDefault();
         actions.restart();
         return;
@@ -85,6 +132,16 @@ export function SnakeGame() {
     },
     [actions, stateRef],
   );
+
+  useEffect(() => {
+    focusBoard();
+  }, [focusBoard]);
+
+  useEffect(() => {
+    if (menuOpen) {
+      actions.pause();
+    }
+  }, [actions, menuOpen]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyboardInput);
@@ -216,28 +273,65 @@ export function SnakeGame() {
     }
   };
 
+  const handleFullscreen = useCallback(() => {
+    const board = boardRef.current;
+
+    if (!board) {
+      return;
+    }
+
+    if (document.fullscreenElement) {
+      void document.exitFullscreen();
+      return;
+    }
+
+    void board.requestFullscreen();
+  }, []);
+
+  const handleModeTabKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.code)) {
+      return;
+    }
+
+    event.preventDefault();
+    const currentIndex = snakeModes.indexOf(state.mode);
+    const nextIndex =
+      event.code === "Home"
+        ? 0
+        : event.code === "End"
+          ? snakeModes.length - 1
+          : event.code === "ArrowRight"
+            ? (currentIndex + 1) % snakeModes.length
+            : (currentIndex - 1 + snakeModes.length) % snakeModes.length;
+    const nextMode = snakeModes[nextIndex];
+
+    actions.selectMode(nextMode);
+    window.requestAnimationFrame(() => {
+      document.getElementById(`snake-mode-tab-${nextMode}`)?.focus();
+    });
+  };
+
   return (
-    <section className={`snake-game mode-${state.mode}`} aria-label="Snake game">
+    <section
+      className={`snake-game mode-${state.mode} status-${state.status} ${
+        menuOpen ? "sidebar-open" : ""
+      }`}
+      aria-label="Snake game"
+    >
       <div className="snake-toolbar">
         <div>
-          <p>{modeDefinition.label}</p>
-          <h3>A polished arcade classic rebuilt for smooth browser play.</h3>
-          <span>Use arrows, WASD, or swipe.</span>
+          <p>Games / Snake</p>
+          <h2>Snake</h2>
+          <span>Eat the dot. Grow the snake. Avoid walls and yourself.</span>
         </div>
-        <div className="snake-mode-tabs" aria-label="Snake modes">
-          {snakeModes.map((mode) => (
-            <button
-              key={mode}
-              className={state.mode === mode ? "active" : ""}
-              type="button"
-              aria-pressed={state.mode === mode}
-              onClick={() => actions.selectMode(mode)}
-            >
-              {snakeModeDefinitions[mode].label}
-            </button>
-          ))}
-        </div>
+        <span className={`snake-status-chip status-${state.status}`} aria-live="polite">
+          {statusLabel}
+        </span>
       </div>
+
+      <span id="snake-board-instructions" className="sr-only">
+        Move with arrow keys, WASD, or swipe. Pause with Space or P. Restart with R.
+      </span>
 
       <div className="snake-game-shell">
         <div
@@ -245,6 +339,7 @@ export function SnakeGame() {
           className={`snake-canvas-shell status-${state.status}`}
           role="application"
           tabIndex={0}
+          aria-describedby="snake-board-instructions"
           aria-label={`Snake board. ${statusLabel}. Score ${state.score}. Best ${bestScore}.`}
           onPointerCancel={() => {
             pointerStartRef.current = null;
@@ -254,62 +349,54 @@ export function SnakeGame() {
           onPointerUp={handlePointerEnd}
         >
           <canvas ref={canvasRef} className="snake-canvas" aria-hidden="true" />
-          <button
-            className="canvas-control"
-            type="button"
-            onClick={state.status === "game-over" ? actions.restart : actions.togglePlay}
-            aria-label={`${primaryActionLabel} Snake`}
-          >
-            {state.status === "playing" ? (
-              <Pause aria-hidden="true" />
-            ) : state.status === "game-over" ? (
-              <RotateCcw aria-hidden="true" />
-            ) : (
-              <Play aria-hidden="true" />
-            )}
-          </button>
-          <div className="canvas-score" aria-hidden="true">
-            {state.score}
-          </div>
           {state.status !== "playing" ? (
-            <div className="snake-state-overlay">
+            <div className="snake-state-overlay" aria-live="polite">
               <p>{statusLabel}</p>
               <strong>{overlayCopy.title}</strong>
               <span>{overlayCopy.body}</span>
-              <button
-                className="primary-action"
-                type="button"
-                onClick={state.status === "game-over" ? actions.restart : actions.togglePlay}
-              >
-                {state.status === "game-over" ? (
-                  <RotateCcw aria-hidden="true" />
-                ) : (
-                  <Play aria-hidden="true" />
-                )}
-                {primaryActionLabel}
-              </button>
             </div>
           ) : null}
         </div>
 
         <aside className="snake-side-panel" aria-label="Snake stats and actions">
-          <div className="snake-stats">
+          <div className="snake-score-strip" aria-label="Snake score">
             <Metric label="Score" value={String(state.score)} />
             <Metric label="Best" value={String(bestScore)} />
             <Metric label="Length" value={String(state.snake.length)} />
-            <Metric label="Speed" value={speedLabel} />
-            <Metric label="Mode" value={modeDefinition.label} />
             <Metric
-              label={state.mode === "blitz" ? "Time" : "Status"}
-              value={remainingMs === null ? statusLabel : formatTime(remainingMs)}
+              label={state.mode === "blitz" ? "Time" : "Speed"}
+              value={remainingMs === null ? speedLabel : formatTime(remainingMs)}
             />
+          </div>
+
+          <div
+            className="snake-mode-tabs"
+            role="tablist"
+            aria-label="Snake modes"
+            onKeyDown={handleModeTabKeyDown}
+          >
+            {snakeModes.map((mode) => (
+              <button
+                key={mode}
+                id={`snake-mode-tab-${mode}`}
+                className={state.mode === mode ? "active" : ""}
+                type="button"
+                role="tab"
+                aria-controls="snake-mode-description"
+                aria-selected={state.mode === mode}
+                onClick={() => actions.selectMode(mode)}
+              >
+                {snakeModeDefinitions[mode].label}
+              </button>
+            ))}
           </div>
 
           <div className="snake-actions">
             <button
               className="primary-action"
               type="button"
-              onClick={state.status === "game-over" ? actions.restart : actions.togglePlay}
+              aria-label={`${primaryActionLabel} Snake`}
+              onClick={handlePrimaryAction}
             >
               {state.status === "playing" ? (
                 <Pause aria-hidden="true" />
@@ -320,13 +407,31 @@ export function SnakeGame() {
               )}
               {primaryActionLabel}
             </button>
-            <button className="secondary-action" type="button" onClick={actions.restart}>
-              <RotateCcw aria-hidden="true" />
-              Restart
+            {state.status !== "game-over" ? (
+              <button className="secondary-action" type="button" onClick={handleRestart}>
+                <RotateCcw aria-hidden="true" />
+                Restart
+              </button>
+            ) : null}
+            <button
+              className="secondary-action"
+              type="button"
+              aria-label="Fullscreen Snake"
+              onClick={handleFullscreen}
+            >
+              <Maximize2 aria-hidden="true" />
+              Focus
             </button>
           </div>
 
-          <p className="snake-hint">{modeDefinition.description}</p>
+          <p id="snake-mode-description" className="snake-hint">
+            {modeDefinition.description}
+          </p>
+          <div className="snake-shortcuts" aria-label="Snake shortcuts">
+            <span>Move: Arrows / WASD / swipe</span>
+            <span>Pause: Space / P</span>
+            <span>Restart: R</span>
+          </div>
         </aside>
       </div>
 

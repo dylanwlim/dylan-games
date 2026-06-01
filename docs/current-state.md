@@ -6,6 +6,13 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-01: Rebuilt `/games/snake` as a dedicated no-scroll play route instead
+  of a hub shelf plus embedded game. The route now uses a compact play shell,
+  viewport-bound Snake board, quiet HUD rail, single score/restart surface,
+  Ready/Playing/Paused/Game Over overlays, sidebar-open pause/dim behavior,
+  hidden game-route sidebar search, full game-genre sidebar taxonomy, and
+  Playwright assertions for no library content, no route scroll, and unclipped
+  board bounds.
 - 2026-06-01: Upgraded Snake from the starter loop into the canonical playable
   implementation for the hub: deterministic Classic/Blitz/Zen modes, smooth
   canvas interpolation, buffered keyboard input, swipe controls, pause/restart

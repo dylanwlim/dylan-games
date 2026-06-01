@@ -15,7 +15,7 @@ const MAX_BUFFERED_DIRECTIONS = 2;
 export const snakeModeDefinitions = {
   classic: {
     label: "Classic",
-    description: "Normal walls, clean growth, and a faster pace as the snake gets longer.",
+    description: "Walls end the run. Speed increases as you grow.",
     baseSpeedMs: 118,
     minSpeedMs: 58,
     speedStepMs: 4,
@@ -25,7 +25,7 @@ export const snakeModeDefinitions = {
   },
   blitz: {
     label: "Blitz",
-    description: "A 60-second score chase with faster movement and the same sharp collisions.",
+    description: "Sixty seconds, higher food value, and faster movement.",
     baseSpeedMs: 98,
     minSpeedMs: 48,
     speedStepMs: 3,
@@ -35,7 +35,7 @@ export const snakeModeDefinitions = {
   },
   zen: {
     label: "Zen",
-    description: "Slower play with wrapping walls and the same self-collision challenge.",
+    description: "Walls wrap. Slow down and keep the route alive.",
     baseSpeedMs: 145,
     minSpeedMs: 82,
     speedStepMs: 2,
@@ -261,9 +261,13 @@ export function chooseFood(snake: Point[], boardSize: number, seed: number): Poi
     return null;
   }
 
-  const index = Math.abs(seed * 17 + snake.length * 31) % openCells.length;
+  const interiorCells = openCells.filter(
+    (point) => point.x > 1 && point.y > 1 && point.x < boardSize - 2 && point.y < boardSize - 2,
+  );
+  const candidates = interiorCells.length > 0 ? interiorCells : openCells;
+  const index = Math.abs(seed * 17 + snake.length * 31) % candidates.length;
 
-  return openCells[index];
+  return candidates[index];
 }
 
 export function directionFromDelta(deltaX: number, deltaY: number): Direction | null {

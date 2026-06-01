@@ -95,6 +95,13 @@ img {
   background: #ffffff;
 }
 
+.arcade-frame.play-frame {
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: #f7f8fb;
+}
+
 .sidebar-toggle {
   display: grid;
   width: 40px;
@@ -131,9 +138,11 @@ img {
   inset: 0;
   z-index: 50;
   border: 0;
-  background: rgba(21, 23, 28, 0.12);
+  background: rgba(21, 23, 28, 0.16);
   padding: 0;
-  pointer-events: none;
+  pointer-events: auto;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
 }
 
 .sidebar-scrim,
@@ -246,8 +255,17 @@ img {
 
 .sidebar-nav {
   display: grid;
+  flex: 1 1 auto;
+  align-content: start;
   gap: 2px;
   margin-top: 0;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .sidebar-link {
@@ -354,6 +372,12 @@ img {
   scrollbar-width: auto;
 }
 
+.arcade-main.play-main {
+  height: 100dvh;
+  overflow: hidden;
+  padding: 16px 20px 16px 96px;
+}
+
 .arcade-scroll-blur {
   position: fixed;
   top: 0;
@@ -374,8 +398,35 @@ img {
   mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.58) 62%, transparent 100%);
 }
 
+.play-frame .arcade-scroll-blur {
+  display: none;
+}
+
 .page-motion-shell {
   min-width: 0;
+}
+
+.play-main .page-motion-shell,
+.play-page,
+.play-game-surface {
+  height: 100%;
+  min-height: 0;
+}
+
+.play-page {
+  display: grid;
+}
+
+.play-game-surface {
+  min-width: 0;
+  transition:
+    filter 160ms ease,
+    opacity 160ms ease;
+}
+
+.play-frame.sidebar-open .play-game-surface {
+  filter: saturate(0.72);
+  opacity: 0.5;
 }
 
 .arcade-main::-webkit-scrollbar {
@@ -1721,15 +1772,18 @@ img {
 
 .snake-game {
   display: grid;
+  height: 100%;
+  min-height: 0;
   min-width: 0;
-  gap: 16px;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 12px;
 }
 
 .snake-toolbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 16px;
-  align-items: end;
+  gap: 14px;
+  align-items: center;
 }
 
 .snake-toolbar p,
@@ -1742,11 +1796,10 @@ img {
   text-transform: uppercase;
 }
 
-.snake-toolbar h3 {
-  max-width: 560px;
+.snake-toolbar h2 {
   margin: 0;
   color: var(--text);
-  font-size: clamp(1.2rem, 2vw, 1.75rem);
+  font-size: clamp(1.35rem, 2.4vw, 2.1rem);
   line-height: 1.08;
 }
 
@@ -1757,6 +1810,27 @@ img {
   color: var(--muted);
   font-size: 0.92rem;
   line-height: 1.45;
+}
+
+.snake-status-chip {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(14, 24, 40, 0.1);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--text);
+  padding: 0 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.snake-status-chip.status-playing {
+  border-color: rgba(0, 122, 255, 0.22);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .snake-mode-tabs {
@@ -1785,7 +1859,8 @@ img {
     box-shadow 160ms ease;
 }
 
-.snake-mode-tabs button.active {
+.snake-mode-tabs button.active,
+.snake-mode-tabs button[aria-selected="true"] {
   background: var(--surface);
   color: var(--text);
   box-shadow: 0 5px 16px rgba(20, 28, 42, 0.08);
@@ -1793,21 +1868,25 @@ img {
 
 .snake-game-shell {
   display: grid;
-  grid-template-columns: minmax(280px, 1.2fr) minmax(230px, 0.8fr);
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
   gap: 16px;
-  align-items: stretch;
+  align-items: center;
 }
 
 .snake-canvas-shell {
   position: relative;
   overflow: hidden;
+  width: min(100%, calc(100dvh - 98px));
   min-width: 0;
+  aspect-ratio: 1 / 1;
+  justify-self: center;
   border: 1px solid rgba(8, 18, 32, 0.22);
-  border-radius: 20px;
+  border-radius: 18px;
   background: #101926;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 22px 54px rgba(16, 25, 38, 0.14);
+    0 20px 46px rgba(16, 25, 38, 0.13);
   touch-action: none;
 }
 
@@ -1821,56 +1900,23 @@ img {
   z-index: 1;
   display: block;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 100%;
 }
 
-.canvas-control,
-.canvas-score,
 .snake-state-overlay {
   position: absolute;
   z-index: 2;
 }
 
-.canvas-control {
-  top: 16px;
-  left: 16px;
-  display: grid;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  backdrop-filter: blur(12px);
-  transition:
-    background 160ms ease,
-    transform 160ms ease;
-}
-
-.canvas-control:hover {
-  background: rgba(255, 255, 255, 0.17);
-  transform: translateY(-1px);
-}
-
-.canvas-score {
-  top: 17px;
-  right: 18px;
-  color: #f7f8fb;
-  font-size: clamp(1.2rem, 2vw, 1.7rem);
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  line-height: 1;
-  text-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
-}
-
 .snake-state-overlay {
-  inset: auto 16px 16px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: grid;
-  max-width: 360px;
+  width: min(360px, calc(100% - 32px));
   gap: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgba(9, 15, 24, 0.68);
   color: #f7f8fb;
   padding: 16px;
@@ -1888,39 +1934,34 @@ img {
   line-height: 1.42;
 }
 
-.snake-state-overlay .primary-action {
-  width: fit-content;
-  min-height: 38px;
-  margin-top: 2px;
-  border: 0;
-}
-
 .snake-side-panel {
   display: grid;
   min-width: 0;
   align-content: start;
-  gap: 14px;
-}
-
-.snake-stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
-  overflow: hidden;
+  gap: 12px;
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: var(--line);
+  background: rgba(255, 255, 255, 0.86);
+  padding: 12px;
+  box-shadow: 0 14px 42px rgba(20, 28, 42, 0.06);
+}
+
+.snake-score-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .metric {
   display: flex;
   min-width: 0;
-  min-height: 72px;
+  min-height: 58px;
   flex-direction: column;
   justify-content: center;
-  border: 0;
-  background: var(--surface);
-  padding: 12px 14px;
+  border: 1px solid rgba(14, 24, 40, 0.07);
+  border-radius: 13px;
+  background: rgba(247, 248, 251, 0.78);
+  padding: 10px 12px;
 }
 
 .metric span {
@@ -1933,7 +1974,7 @@ img {
   overflow: hidden;
   margin-top: 6px;
   color: var(--text);
-  font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+  font-size: clamp(0.9rem, 1.3vw, 1.04rem);
   font-weight: 700;
   line-height: 1.08;
   text-overflow: ellipsis;
@@ -1942,7 +1983,7 @@ img {
 
 .snake-actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
@@ -1955,6 +1996,14 @@ img {
 
 .snake-actions .secondary-action {
   margin-top: 0;
+}
+
+.snake-shortcuts {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.3;
 }
 
 .secondary-action {
@@ -2490,6 +2539,18 @@ img {
     padding: 74px 16px 40px 84px;
   }
 
+  .arcade-frame.play-frame {
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+
+  .arcade-main.play-main {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    padding: 10px 12px 10px 76px;
+  }
+
   .arcade-title h1 {
     font-size: 2.45rem;
   }
@@ -2645,16 +2706,76 @@ img {
     grid-template-columns: 1fr;
   }
 
+  .snake-game {
+    gap: 8px;
+  }
+
+  .snake-toolbar {
+    gap: 8px;
+  }
+
   .snake-mode-tabs {
     width: 100%;
+  }
+
+  .snake-game-shell {
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .snake-canvas-shell {
+    width: min(100%, calc(100dvh - 258px));
   }
 
   .snake-state-overlay {
     max-width: none;
   }
 
+  .snake-side-panel {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .snake-score-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .metric {
+    min-height: 46px;
+    padding: 7px 8px;
+  }
+
+  .metric span {
+    font-size: 0.64rem;
+  }
+
+  .metric strong {
+    margin-top: 4px;
+    font-size: 0.86rem;
+  }
+
   .snake-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .snake-actions .primary-action,
+  .snake-actions .secondary-action {
+    min-height: 42px;
+    gap: 6px;
+    padding: 0 8px;
+    font-size: 0.82rem;
+  }
+
+  .snake-hint {
+    margin-top: 0;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .snake-shortcuts {
+    display: none;
   }
 
   .touch-pad {
@@ -2732,27 +2853,13 @@ img {
     grid-template-columns: 98px minmax(0, 1fr);
   }
 
-  .snake-toolbar h3 {
+  .snake-toolbar h2 {
     font-size: 1.08rem;
   }
 
-  .snake-stats {
-    grid-template-columns: 1fr;
-  }
-
   .snake-state-overlay {
-    inset: auto 10px 10px;
+    width: min(300px, calc(100% - 20px));
     padding: 12px;
-  }
-
-  .canvas-control {
-    top: 10px;
-    left: 10px;
-  }
-
-  .canvas-score {
-    top: 12px;
-    right: 12px;
   }
 }
 

@@ -58,7 +58,6 @@ const gameComponents = {
 
 const allGames: GameDefinition[] = games;
 const fallbackGame = allGames[0] as GameDefinition;
-const sidebarGenres = ["action", "adventure", "puzzle", "racing", "simulation", "strategy"];
 const favoriteGameSlugs = ["snake", "minesweeper", "orbit"] as const;
 
 const genrePreviewArt: Partial<
@@ -281,7 +280,10 @@ export function GameHub({
   const selectedGenre = initialGenre ? getGenreBySlug(initialGenre) : undefined;
   const isGames = view === "games";
   const sidebarExpanded = sidebarPinned || sidebarHovered;
-  const contentKey = `${view}:${initialGenre ?? "all"}:${focusGame ? "game" : "store"}`;
+  const contentKey = `${view}:${initialGenre ?? "all"}:${focusGame ? selectedSlug : "store"}`;
+  const frameClassName = `arcade-frame ${focusGame ? "play-frame" : ""} ${
+    sidebarExpanded ? "sidebar-open" : ""
+  }`;
 
   useEffect(() => {
     return () => {
@@ -419,14 +421,29 @@ export function GameHub({
 
   return (
     <LazyMotion features={domAnimation}>
-      <div className="arcade-frame">
+      <div className={frameClassName}>
         <a className="skip-link" href="#main-content">
           Skip to content
         </a>
+        <AnimatePresence initial={false}>
+          {sidebarExpanded ? (
+            <m.button
+              className="sidebar-scrim"
+              type="button"
+              aria-label="Dismiss navigation"
+              onClick={closeSidebar}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.16, ease: "easeOut" }}
+            />
+          ) : null}
+        </AnimatePresence>
         <Sidebar
           activeView={view}
           activeGenre={initialGenre}
           expanded={sidebarExpanded}
+          hideSearch={focusGame}
           pinned={sidebarPinned}
           searchQuery={searchQuery}
           onNavigate={navigateWithMotion}
@@ -452,7 +469,7 @@ export function GameHub({
         />
         <m.main
           id="main-content"
-          className="arcade-main"
+          className={`arcade-main ${focusGame ? "play-main" : ""}`}
           ref={mainRef}
           onClickCapture={handleMainLinkClick}
         >
@@ -466,14 +483,23 @@ export function GameHub({
               exit={shouldReduceMotion ? undefined : "exit"}
             >
               {isGames ? (
-                <GamesView
-                  activeGenre={selectedGenre}
-                  focusGame={focusGame}
-                  searchQuery={searchQuery}
-                  selectedGame={selectedGame}
-                  shouldReduceMotion={Boolean(shouldReduceMotion)}
-                  onGameSelect={selectGame}
-                />
+                focusGame ? (
+                  <GamePlayView
+                    selectedGame={selectedGame}
+                    sidebarOpen={sidebarExpanded}
+                    shouldReduceMotion={Boolean(shouldReduceMotion)}
+                    onPlaySnake={() => selectGame(games[0])}
+                  />
+                ) : (
+                  <GamesView
+                    activeGenre={selectedGenre}
+                    focusGame={false}
+                    searchQuery={searchQuery}
+                    selectedGame={selectedGame}
+                    shouldReduceMotion={Boolean(shouldReduceMotion)}
+                    onGameSelect={selectGame}
+                  />
+                )
               ) : (
                 <CollectionView activeGenre={selectedGenre} searchQuery={searchQuery} view={view} />
               )}
@@ -489,6 +515,7 @@ function Sidebar({
   activeView,
   activeGenre,
   expanded,
+  hideSearch,
   pinned,
   searchQuery,
   onNavigate,
@@ -501,6 +528,7 @@ function Sidebar({
   activeView: GameHubView;
   activeGenre?: GenreSlug;
   expanded: boolean;
+  hideSearch: boolean;
   pinned: boolean;
   searchQuery: string;
   onNavigate: (href: string) => void;
@@ -511,6 +539,7 @@ function Sidebar({
   onHoverEnd: () => void;
 }) {
   const sidebarState = expanded ? "expanded" : "collapsed";
+  const toggleLabel = pinned ? "Close navigation" : "Open navigation";
   const shouldReduceMotion = useReducedMotion();
   const sidebarTransition = shouldReduceMotion
     ? { duration: 0 }
@@ -562,12 +591,20 @@ function Sidebar({
       transition={sidebarTransition}
       data-pinned={pinned ? "true" : "false"}
       onMouseEnter={onHoverStart}
-      onMouseLeave={onHoverEnd}
+      onMouseLeave={() => {
+        if (!pinned) {
+          onHoverEnd();
+        }
+      }}
       onPointerEnter={onHoverStart}
-      onPointerLeave={onHoverEnd}
+      onPointerLeave={() => {
+        if (!pinned) {
+          onHoverEnd();
+        }
+      }}
       onFocusCapture={onHoverStart}
       onBlurCapture={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) {
+        if (!pinned && !event.currentTarget.contains(event.relatedTarget)) {
           onHoverEnd();
         }
       }}
@@ -576,33 +613,26 @@ function Sidebar({
         <button
           className="sidebar-toggle"
           type="button"
-          onClick={onOpen}
+          onClick={pinned ? onClose : onOpen}
           aria-controls="arcade-sidebar"
           aria-expanded={expanded}
-          aria-label="Open navigation"
+          aria-label={toggleLabel}
         >
-          <Menu aria-hidden="true" />
+          {pinned ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
         </button>
-        <label className="sidebar-search">
-          <Search aria-hidden="true" />
-          <span className="sr-only">Search games</span>
-          <input
-            value={searchQuery}
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Search"
-            tabIndex={expanded ? undefined : -1}
-            type="search"
-          />
-        </label>
-        <button
-          className="sidebar-close"
-          type="button"
-          onClick={onClose}
-          aria-label="Close navigation"
-          tabIndex={expanded ? undefined : -1}
-        >
-          <X aria-hidden="true" />
-        </button>
+        {!hideSearch ? (
+          <label className="sidebar-search">
+            <Search aria-hidden="true" />
+            <span className="sr-only">Search games</span>
+            <input
+              value={searchQuery}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder="Search"
+              tabIndex={expanded ? undefined : -1}
+              type="search"
+            />
+          </label>
+        ) : null}
       </m.div>
 
       <m.nav className="sidebar-nav" aria-label="Sections" variants={staggerVariants}>
@@ -633,20 +663,18 @@ function Sidebar({
           labelVariants={labelVariants}
           onNavigate={onNavigate}
         />
-        {gameGenres
-          .filter((genre) => sidebarGenres.includes(genre.slug))
-          .map((genre) => (
-            <SidebarLink
-              key={genre.slug}
-              href={`/genres/${genre.slug}`}
-              icon={iconMap[genre.icon]}
-              label={genre.label}
-              active={activeGenre === genre.slug}
-              expanded={expanded}
-              labelVariants={labelVariants}
-              onNavigate={onNavigate}
-            />
-          ))}
+        {gameGenres.map((genre) => (
+          <SidebarLink
+            key={genre.slug}
+            href={`/genres/${genre.slug}`}
+            icon={iconMap[genre.icon]}
+            label={genre.label}
+            active={activeGenre === genre.slug}
+            expanded={expanded}
+            labelVariants={labelVariants}
+            onNavigate={onNavigate}
+          />
+        ))}
       </m.nav>
 
       <m.a
@@ -1350,6 +1378,57 @@ function CollectionGameCard({ game }: { game: GameDefinition }) {
         </span>
       </span>
     </Link>
+  );
+}
+
+function GamePlayView({
+  selectedGame,
+  sidebarOpen,
+  shouldReduceMotion,
+  onPlaySnake,
+}: {
+  selectedGame: GameDefinition;
+  sidebarOpen: boolean;
+  shouldReduceMotion: boolean;
+  onPlaySnake: () => void;
+}) {
+  const GameComponent = gameComponents[selectedGame.slug as keyof typeof gameComponents];
+
+  return (
+    <m.div className="play-page" variants={pageCascadeVariants}>
+      <AnimatePresence mode="wait">
+        <m.div
+          key={selectedGame.slug}
+          className="play-game-surface"
+          variants={gamePanelVariants}
+          initial={shouldReduceMotion ? false : "hidden"}
+          animate="visible"
+          exit={shouldReduceMotion ? undefined : "exit"}
+        >
+          {GameComponent ? (
+            <GameComponent menuOpen={sidebarOpen} />
+          ) : (
+            <section
+              className="launcher-panel play-unavailable"
+              aria-labelledby="play-unavailable-title"
+            >
+              <m.div className="launcher-header">
+                <div>
+                  <p>Preview</p>
+                  <h2 id="play-unavailable-title">{selectedGame.title}</h2>
+                  <span>{selectedGame.summary}</span>
+                </div>
+                <span className={`status-badge ${selectedGame.status}`}>
+                  <Lock aria-hidden="true" />
+                  Coming soon
+                </span>
+              </m.div>
+              <UnavailableGame game={selectedGame} onPlaySnake={onPlaySnake} />
+            </section>
+          )}
+        </m.div>
+      </AnimatePresence>
+    </m.div>
   );
 }
 
