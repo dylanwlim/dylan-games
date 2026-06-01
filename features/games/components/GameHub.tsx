@@ -1581,10 +1581,12 @@ function PreviewArt({ kind }: { kind: GameDefinition["preview"] }) {
   if (kind === "snake") {
     return (
       <>
-        <i className="snake-dot a" />
-        <i className="snake-dot b" />
-        <i className="snake-dot c" />
-        <i className="snake-dot d" />
+        <span className="snake-preview-route">
+          <i className="snake-route tail" />
+          <i className="snake-route turn" />
+          <i className="snake-route neck" />
+          <i className="snake-head-dot" />
+        </span>
         <i className="food-dot" />
       </>
     );

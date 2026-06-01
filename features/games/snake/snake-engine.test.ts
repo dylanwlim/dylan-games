@@ -86,7 +86,7 @@ describe("snake engine", () => {
     const next = stepSnake(state);
 
     expect(next.status).toBe("game-over");
-    expect(next.lastEvent).toBe("crashed");
+    expect(next.lastEvent).toBe("hit-wall");
   });
 
   it("wraps walls in zen mode", () => {

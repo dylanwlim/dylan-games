@@ -963,32 +963,110 @@ img {
   background-size: 16px 16px;
 }
 
-.store-app-icon .snake-dot,
+.store-app-icon .snake-route,
+.store-app-icon .snake-head-dot,
 .store-app-icon .food-dot {
   width: 9px;
   height: 9px;
-  border-radius: 3px;
+  border-radius: 999px;
 }
 
-.store-app-icon .snake-dot {
-  box-shadow:
-    10px 0 0 var(--green),
-    20px 0 0 var(--green),
-    30px 0 0 var(--green);
+.store-app-icon .snake-preview-route {
+  top: 19px;
+  right: auto;
+  bottom: auto;
+  left: 14px;
+  width: 40px;
+  height: 30px;
 }
 
-.store-app-icon.small .snake-dot,
+.store-app-icon .snake-route.tail {
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 9px;
+}
+
+.store-app-icon .snake-route.turn {
+  top: 0;
+  left: 23px;
+  width: 9px;
+  height: 25px;
+}
+
+.store-app-icon .snake-route.neck {
+  top: 16px;
+  left: 23px;
+  width: 26px;
+  height: 9px;
+}
+
+.store-app-icon .snake-head-dot {
+  top: 9px;
+  left: 41px;
+  width: 17px;
+  height: 17px;
+}
+
+.store-app-icon.small .snake-route,
+.store-app-icon.small .snake-head-dot,
 .store-app-icon.small .food-dot {
   width: 6px;
   height: 6px;
-  border-radius: 2px;
+  border-radius: 999px;
 }
 
-.store-app-icon.small .snake-dot {
-  box-shadow:
-    7px 0 0 var(--green),
-    14px 0 0 var(--green),
-    21px 0 0 var(--green);
+.store-app-icon.small .snake-preview-route {
+  top: 11px;
+  right: auto;
+  bottom: auto;
+  left: 8px;
+  width: 24px;
+  height: 19px;
+}
+
+.store-app-icon.small .snake-route.tail {
+  top: 0;
+  left: 0;
+  width: 21px;
+  height: 6px;
+}
+
+.store-app-icon.small .snake-route.turn {
+  top: 0;
+  left: 15px;
+  width: 6px;
+  height: 17px;
+}
+
+.store-app-icon.small .snake-route.neck {
+  top: 11px;
+  left: 15px;
+  width: 17px;
+  height: 6px;
+}
+
+.store-app-icon.small .snake-head-dot {
+  top: 7px;
+  left: 27px;
+  width: 10px;
+  height: 10px;
+}
+
+.store-app-icon.small .snake-head-dot::before,
+.store-app-icon.small .snake-head-dot::after {
+  width: 2px;
+  height: 2px;
+}
+
+.store-app-icon.small .snake-head-dot::before {
+  top: 3px;
+  right: 3px;
+}
+
+.store-app-icon.small .snake-head-dot::after {
+  right: 3px;
+  bottom: 3px;
 }
 
 .store-app-icon .mine-grid {
@@ -1630,47 +1708,79 @@ img {
   background-size: 22px 22px;
 }
 
-.snake-dot,
+.snake-preview-route {
+  position: absolute;
+  inset: 30% 22%;
+}
+
+.snake-route,
+.snake-head-dot,
 .food-dot {
   position: absolute;
-  width: 18px;
+  border-radius: 999px;
+}
+
+.snake-route,
+.snake-head-dot {
+  background: linear-gradient(135deg, #b3fa93, var(--green) 62%, #46b85b);
+  box-shadow: 0 8px 18px rgba(59, 184, 81, 0.24);
+}
+
+.snake-route.tail {
+  top: 0;
+  left: 0;
+  width: 74px;
   height: 18px;
-  border-radius: 5px;
 }
 
-.snake-dot {
-  background: var(--green);
-  box-shadow:
-    20px 0 0 var(--green),
-    40px 0 0 var(--green),
-    60px 0 0 var(--green);
+.snake-route.turn {
+  top: 0;
+  left: 56px;
+  width: 18px;
+  height: 52px;
 }
 
-.snake-dot.a {
-  top: 38%;
-  left: 24%;
+.snake-route.neck {
+  top: 34px;
+  left: 56px;
+  width: 54px;
+  height: 18px;
 }
 
-.snake-dot.b {
-  top: 48%;
-  left: 49%;
-  transform: rotate(90deg);
+.snake-head-dot {
+  top: 27px;
+  left: 94px;
+  width: 30px;
+  height: 30px;
 }
 
-.snake-dot.c {
-  top: 62%;
-  left: 46%;
+.snake-head-dot::before,
+.snake-head-dot::after {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: #0b1c12;
+  content: "";
 }
 
-.snake-dot.d {
-  top: 62%;
-  left: 58%;
+.snake-head-dot::before {
+  top: 8px;
+  right: 8px;
+}
+
+.snake-head-dot::after {
+  right: 8px;
+  bottom: 8px;
 }
 
 .food-dot {
-  top: 35%;
+  top: 34%;
   right: 24%;
-  background: var(--red);
+  width: 18px;
+  height: 18px;
+  background: radial-gradient(circle at 35% 32%, #ffd0c9, var(--red) 58%, #cf4842);
+  box-shadow: 0 8px 20px rgba(255, 111, 99, 0.28);
 }
 
 .mine-grid {
@@ -1820,60 +1930,81 @@ img {
 .snake-game {
   --snake-board: #0b121d;
   --snake-board-deep: #07101a;
-  --snake-panel: rgba(255, 255, 255, 0.9);
-  --snake-panel-line: rgba(14, 24, 40, 0.08);
+  --snake-panel: rgba(255, 255, 255, 0.92);
+  --snake-panel-line: rgba(14, 24, 40, 0.1);
   --snake-green: #83e46f;
   --snake-red: #ff6f63;
   display: grid;
   height: 100%;
   min-height: 0;
   min-width: 0;
+  max-width: min(100%, 1280px);
   grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 14px;
+  gap: 12px;
+  margin: 0 auto;
 }
 
 .snake-toolbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
+  gap: 18px;
+  align-items: end;
+}
+
+.snake-title-block {
+  display: grid;
+  gap: 7px;
+}
+
+.snake-back-link {
+  display: inline-flex;
+  width: fit-content;
   align-items: center;
-}
-
-.snake-toolbar p,
-.snake-state-overlay p {
-  margin: 0 0 5px;
-  color: var(--accent);
-  font-size: 0.72rem;
+  gap: 6px;
+  color: #168445;
+  font-size: 0.78rem;
   font-weight: 760;
-  letter-spacing: 0;
-  text-transform: uppercase;
+  line-height: 1;
 }
 
-.snake-toolbar h2 {
+.snake-back-link:hover {
+  color: #0f6f39;
+}
+
+.snake-title-block h2 {
   margin: 0;
   color: var(--text);
-  font-size: clamp(1.38rem, 2.2vw, 2rem);
+  font-size: clamp(1.45rem, 2.3vw, 2.25rem);
   line-height: 1.08;
 }
 
-.snake-toolbar span,
+.snake-title-block span,
 .snake-hint {
   display: block;
-  margin-top: 6px;
+  margin-top: 5px;
   color: var(--muted);
   font-size: 0.9rem;
   line-height: 1.45;
 }
 
+.snake-header-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.snake-header-stats > span,
 .snake-status-chip {
   display: inline-flex;
   min-height: 34px;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  border: 1px solid rgba(14, 24, 40, 0.08);
+  gap: 6px;
+  border: 1px solid rgba(14, 24, 40, 0.09);
   border-radius: 999px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.72);
   color: var(--text);
   padding: 0 12px;
   font-size: 0.78rem;
@@ -1882,17 +2013,28 @@ img {
 }
 
 .snake-status-chip::before {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 999px;
   background: currentColor;
   content: "";
 }
 
-.snake-status-chip.status-playing {
-  border-color: rgba(103, 201, 95, 0.26);
-  background: rgba(230, 248, 227, 0.86);
+.snake-status-chip.status-ready {
+  color: #51715d;
+}
+
+.snake-status-chip.status-playing,
+.snake-status-chip.status-paused {
+  border-color: rgba(103, 201, 95, 0.24);
+  background: rgba(230, 248, 227, 0.78);
   color: #278f3a;
+}
+
+.snake-status-chip.status-game-over {
+  border-color: rgba(255, 111, 99, 0.22);
+  background: rgba(255, 235, 232, 0.78);
+  color: #b5463f;
 }
 
 .snake-mode-tabs {
@@ -1901,20 +2043,24 @@ img {
   overflow: hidden;
   width: 100%;
   border: 1px solid var(--snake-panel-line);
-  border-radius: 12px;
-  background: #eff1f5;
-  padding: 3px;
+  border-radius: 15px;
+  background: #eef2ee;
+  padding: 4px;
 }
 
 .snake-mode-tabs button {
-  min-height: 36px;
+  display: grid;
+  min-height: 44px;
+  align-content: center;
+  gap: 2px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 12px;
   background: transparent;
   color: var(--muted);
-  padding: 0 10px;
-  font-size: 0.82rem;
+  padding: 5px 9px;
+  font-size: 0.8rem;
   font-weight: 650;
+  cursor: pointer;
   transition:
     background 160ms ease,
     color 160ms ease,
@@ -1925,54 +2071,85 @@ img {
 .snake-mode-tabs button[aria-selected="true"] {
   background: var(--surface);
   color: var(--text);
-  box-shadow: 0 6px 18px rgba(20, 28, 42, 0.08);
+  box-shadow:
+    inset 0 -2px 0 rgba(103, 201, 95, 0.72),
+    0 7px 18px rgba(20, 28, 42, 0.08);
+}
+
+.snake-mode-tabs button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.snake-mode-tabs small {
+  color: var(--subtle);
+  font-size: 0.66rem;
+  font-weight: 650;
 }
 
 .snake-game-shell {
   display: grid;
   min-height: 0;
-  grid-template-columns: minmax(0, 1fr) minmax(276px, 338px);
-  gap: 16px;
+  grid-template-columns: minmax(0, min(68dvw, calc(100dvh - 116px))) 326px;
+  gap: 34px;
   align-items: start;
+  justify-content: center;
 }
 
 .snake-canvas-shell {
   position: relative;
   overflow: hidden;
-  width: min(100%, calc(100dvh - 140px));
+  width: 100%;
   min-width: 0;
   aspect-ratio: 1 / 1;
-  justify-self: center;
-  border: 1px solid rgba(8, 18, 32, 0.28);
-  border-radius: 22px;
+  border: 1px solid rgba(8, 18, 32, 0.22);
+  border-radius: 20px;
+  outline: none;
   background:
     radial-gradient(circle at 25% 20%, rgba(131, 228, 111, 0.12), transparent 30%),
     radial-gradient(circle at 74% 80%, rgba(255, 111, 99, 0.1), transparent 28%),
     linear-gradient(145deg, var(--snake-board), var(--snake-board-deep));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    inset 0 -26px 52px rgba(0, 0, 0, 0.2),
-    0 24px 60px rgba(16, 25, 38, 0.16);
+    inset 0 -18px 40px rgba(0, 0, 0, 0.2),
+    0 20px 54px rgba(16, 25, 38, 0.14);
   touch-action: none;
 }
 
-.snake-canvas-shell::before {
+.snake-canvas-shell::before,
+.snake-canvas-shell::after {
   position: absolute;
   inset: 0;
   z-index: 0;
   border-radius: inherit;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 28px 28px;
   content: "";
-  mask-image: radial-gradient(circle, #000 46%, transparent 78%);
   pointer-events: none;
 }
 
+.snake-canvas-shell::before {
+  background:
+    radial-gradient(circle at 48% 44%, transparent 48%, rgba(2, 6, 12, 0.2) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 30%);
+}
+
+.snake-canvas-shell::after {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(circle, #000 46%, transparent 78%);
+}
+
 .snake-canvas-shell:focus-visible {
-  outline: 3px solid rgba(0, 122, 255, 0.42);
-  outline-offset: 4px;
+  box-shadow:
+    0 0 0 3px rgba(131, 228, 111, 0.2),
+    0 20px 54px rgba(16, 25, 38, 0.14);
+}
+
+.snake-canvas-shell.status-game-over:focus-visible {
+  box-shadow:
+    0 0 0 3px rgba(255, 111, 99, 0.2),
+    0 20px 54px rgba(16, 25, 38, 0.14);
 }
 
 .snake-canvas {
@@ -1986,25 +2163,22 @@ img {
 .snake-state-overlay {
   position: absolute;
   z-index: 2;
-}
-
-.snake-state-overlay {
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   display: grid;
-  width: min(360px, calc(100% - 32px));
-  gap: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 18px;
-  background: rgba(9, 15, 24, 0.72);
+  width: min(390px, calc(100% - 32px));
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+  background: rgba(8, 14, 23, 0.76);
   color: #f7f8fb;
-  padding: 16px;
+  padding: 18px;
   backdrop-filter: blur(18px) saturate(1.12);
+  translate: -50% -50%;
 }
 
 .snake-state-overlay strong {
-  font-size: clamp(1.35rem, 3vw, 2rem);
+  font-size: clamp(1.45rem, 3vw, 2.2rem);
   line-height: 1;
 }
 
@@ -2014,16 +2188,87 @@ img {
   line-height: 1.42;
 }
 
+.snake-overlay-kicker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.snake-overlay-kicker span,
+.snake-overlay-kicker small {
+  color: var(--snake-green);
+  font-size: 0.72rem;
+  font-weight: 760;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.snake-overlay-kicker small {
+  color: rgba(247, 248, 251, 0.62);
+}
+
+.snake-overlay-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.snake-overlay-stats span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 8px;
+}
+
+.snake-overlay-stats small {
+  color: rgba(247, 248, 251, 0.56);
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.snake-overlay-stats b {
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 0.86rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.snake-overlay-action {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #8df17a, #46bd5b);
+  color: #07150d;
+  font-size: 0.94rem;
+  font-weight: 780;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(92, 205, 83, 0.28);
+}
+
+.snake-overlay-action svg {
+  width: 17px;
+  height: 17px;
+}
+
 .snake-side-panel {
   display: grid;
   min-width: 0;
   align-content: start;
-  gap: 10px;
+  gap: 11px;
   border: 1px solid var(--snake-panel-line);
-  border-radius: 20px;
+  border-radius: 22px;
   background: var(--snake-panel);
-  padding: 12px;
-  box-shadow: 0 18px 48px rgba(20, 28, 42, 0.07);
+  padding: 13px;
+  box-shadow: 0 18px 42px rgba(20, 28, 42, 0.06);
   backdrop-filter: blur(18px) saturate(1.08);
 }
 
@@ -2042,8 +2287,8 @@ img {
 }
 
 .snake-run-summary span,
-.snake-top-score-header span,
-.snake-top-score-row span {
+.snake-best-panel span,
+.snake-best-list span {
   color: rgba(247, 248, 251, 0.7);
   font-size: 0.72rem;
   font-weight: 680;
@@ -2073,9 +2318,15 @@ img {
   padding: 0 8px;
 }
 
+.snake-run-summary-meta .last-bite-pop {
+  border-color: rgba(131, 228, 111, 0.3);
+  background: rgba(131, 228, 111, 0.12);
+  color: #bbffab;
+}
+
 .snake-score-strip {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -2086,78 +2337,68 @@ img {
   flex-direction: column;
   justify-content: center;
   border: 1px solid var(--snake-panel-line);
-  border-radius: 12px;
-  background: rgba(247, 248, 251, 0.78);
-  padding: 9px 10px;
+  border-radius: 14px;
+  background: rgba(247, 249, 247, 0.82);
+  padding: 10px;
+}
+
+.metric.muted {
+  opacity: 0.62;
 }
 
 .metric span {
-  color: var(--subtle);
-  font-size: 0.68rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #6d747d;
+  font-size: 0.7rem;
   font-weight: 620;
+}
+
+.metric svg {
+  width: 13px;
+  height: 13px;
+  color: #3a9d4d;
 }
 
 .metric strong {
   overflow: hidden;
   margin-top: 6px;
   color: var(--text);
-  font-size: clamp(0.9rem, 1.3vw, 1.04rem);
+  font-size: clamp(1rem, 1.4vw, 1.12rem);
   font-weight: 700;
   line-height: 1.08;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.snake-top-score {
-  display: grid;
-  gap: 8px;
+.snake-best-panel {
+  display: block;
   border: 1px solid var(--snake-panel-line);
-  border-radius: 16px;
-  background: rgba(247, 248, 251, 0.78);
+  border-radius: 14px;
+  background: rgba(247, 249, 247, 0.82);
   padding: 10px;
 }
 
-.snake-top-score-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+.snake-best-panel > span {
+  color: #7a818a;
 }
 
-.snake-top-score-header span,
-.snake-top-score-row span {
-  color: var(--subtle);
-}
-
-.snake-top-score-header strong {
-  color: var(--text);
-  font-size: 1.12rem;
-  line-height: 1;
-}
-
-.snake-top-score-list {
+.snake-best-list {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
 }
 
-.snake-top-score-row {
+.snake-best-list span {
   display: grid;
-  min-height: 30px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px;
-  border-radius: 10px;
-  padding: 0 8px;
+  gap: 4px;
+  color: #7a818a;
 }
 
-.snake-top-score-row.active {
-  background: #ffffff;
-  box-shadow: inset 0 0 0 1px rgba(103, 201, 95, 0.2);
-}
-
-.snake-top-score-row strong {
+.snake-best-list strong {
   color: var(--text);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .snake-actions {
@@ -2171,10 +2412,52 @@ img {
 .touch-pad button {
   min-height: 44px;
   border: 0;
+  cursor: pointer;
+}
+
+.snake-actions .primary-action,
+.snake-actions .secondary-action {
+  justify-content: space-between;
+  gap: 10px;
+  padding-inline: 16px;
+}
+
+.snake-actions .primary-action {
+  background: linear-gradient(135deg, #8df17a, #46bd5b);
+  color: #07150d;
+  font-weight: 780;
+  box-shadow: 0 12px 28px rgba(92, 205, 83, 0.22);
+}
+
+.snake-actions .primary-action:hover {
+  background: linear-gradient(135deg, #9cff86, #3eaf53);
+  box-shadow: 0 14px 32px rgba(92, 205, 83, 0.26);
 }
 
 .snake-actions .secondary-action {
   margin-top: 0;
+}
+
+.snake-actions .primary-action > span,
+.snake-actions .secondary-action > span {
+  flex: 1;
+  text-align: left;
+}
+
+.snake-game kbd {
+  display: inline-flex;
+  min-width: 28px;
+  min-height: 22px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(14, 24, 40, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.46);
+  color: inherit;
+  padding: 0 6px;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 780;
 }
 
 .secondary-action {
@@ -2183,7 +2466,7 @@ img {
   justify-content: center;
   gap: 9px;
   border-radius: 999px;
-  background: #eff1f5;
+  background: #edf0ef;
   color: var(--text);
   padding: 0 16px;
   font-weight: 650;
@@ -2662,6 +2945,1043 @@ img {
   white-space: nowrap;
 }
 
+.cipherword-preview-art {
+  position: absolute;
+  inset: 18%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.cipherword-preview-tile {
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: #f8fafc;
+  color: #111827;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 760;
+}
+
+.cipherword-preview-tile.correct {
+  background: #1769e0;
+  color: #ffffff;
+}
+
+.cipherword-preview-tile.present {
+  background: #f6c453;
+  color: #111827;
+}
+
+.cipherword-preview-tile.absent {
+  background: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.cipherword-preview-meter {
+  position: absolute;
+  right: 0;
+  bottom: -12px;
+  left: 0;
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #64748b, #f6c453 52%, #7c54ff);
+}
+
+.cipherword-cta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #e4e7ee;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(124, 84, 255, 0.12), transparent 34%),
+    #ffffff;
+  padding: 14px;
+  color: #222326;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+}
+
+.cipherword-cta.banner {
+  min-height: 122px;
+}
+
+.cipherword-cta-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 14px;
+  background: #17142a;
+  color: #ffffff;
+}
+
+.cipherword-cta-icon svg,
+.cipherword-cta-meta svg,
+.cipherword-cta-archive svg {
+  width: 17px;
+  height: 17px;
+}
+
+.cipherword-cta-copy {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.cipherword-cta-copy strong {
+  overflow: hidden;
+  font-size: 1.02rem;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cipherword-cta-copy span {
+  overflow: hidden;
+  color: #667085;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cipherword-cta-meta,
+.cipherword-cta-action,
+.cipherword-cta-archive {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 999px;
+  padding: 0 12px;
+  font-size: 0.86rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.cipherword-cta-meta {
+  background: #f3f6fb;
+  color: #7c54ff;
+}
+
+.cipherword-cta-action {
+  background: #1769e0;
+  color: #ffffff;
+}
+
+.cipherword-cta-archive {
+  background: #f3f6fb;
+  color: #344054;
+}
+
+.cipherword-game {
+  --cipher-panel: rgba(255, 255, 255, 0.92);
+  --cipher-line: rgba(14, 24, 40, 0.09);
+  --cipher-ink: #1f2329;
+  --cipher-muted: #687083;
+  --cipher-blue: #1769e0;
+  --cipher-violet: #7c54ff;
+  --cipher-amber: #f6c453;
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 10px;
+  color: var(--cipher-ink);
+}
+
+.cipherword-game.high-contrast {
+  --cipher-panel: #ffffff;
+  --cipher-line: #0f172a;
+  --cipher-muted: #334155;
+  --cipher-blue: #004fbe;
+}
+
+.cipherword-game.loading {
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: #ffffff;
+  font-weight: 650;
+}
+
+.cipherword-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.cipherword-toolbar p,
+.cipherword-archive-hero p {
+  margin: 0 0 5px;
+  color: var(--cipher-blue);
+  font-size: 0.72rem;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
+.cipherword-toolbar h2 {
+  margin: 0;
+  font-size: clamp(1.25rem, 2vw, 1.88rem);
+  line-height: 1.08;
+}
+
+.cipherword-toolbar span {
+  display: block;
+  margin-top: 5px;
+  color: var(--cipher-muted);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.cipherword-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cipherword-archive-link,
+.cipherword-status-chip {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 999px;
+  padding: 0 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cipherword-archive-link {
+  border: 1px solid var(--cipher-line);
+  background: #ffffff;
+  color: var(--cipher-ink);
+}
+
+.cipherword-archive-link svg,
+.cipherword-status-chip svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cipherword-status-chip {
+  border: 1px solid rgba(23, 105, 224, 0.2);
+  background: #e8f1ff;
+  color: var(--cipher-blue);
+  text-transform: capitalize;
+}
+
+.cipherword-status-chip.status-won {
+  border-color: rgba(103, 201, 95, 0.32);
+  background: #e6f8e3;
+  color: #278f3a;
+}
+
+.cipherword-mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 3px;
+  overflow: hidden;
+  border: 1px solid var(--cipher-line);
+  border-radius: 13px;
+  background: #eff1f5;
+  padding: 3px;
+}
+
+.cipherword-mode-tabs button,
+.cipherword-mode-tabs a {
+  display: grid;
+  min-height: 36px;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--cipher-muted);
+  padding: 0 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.cipherword-mode-tabs button.active,
+.cipherword-mode-tabs button[aria-selected="true"],
+.cipherword-mode-tabs a.active,
+.cipherword-mode-tabs a[aria-selected="true"] {
+  background: #ffffff;
+  color: var(--cipher-ink);
+  box-shadow: 0 6px 18px rgba(20, 28, 42, 0.08);
+}
+
+.cipherword-shell {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: 14px;
+}
+
+.cipherword-play-panel,
+.cipherword-side-panel {
+  min-width: 0;
+  border: 1px solid var(--cipher-line);
+  border-radius: 22px;
+  background: var(--cipher-panel);
+  box-shadow: 0 18px 48px rgba(20, 28, 42, 0.07);
+  backdrop-filter: blur(18px) saturate(1.08);
+}
+
+.cipherword-play-panel {
+  display: grid;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto;
+  gap: 10px;
+  padding: 12px;
+}
+
+.cipherword-side-panel {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  overflow: auto;
+  padding: 12px;
+}
+
+.cipherword-board-header {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cipherword-board-header > div,
+.cipherword-streak-panel,
+.cipherword-clue-card,
+.cipherword-closest-card,
+.cipherword-stats-panel,
+.cipherword-achievement-shelf,
+.cipherword-settings-panel,
+.cipherword-storage-warning {
+  border: 1px solid var(--cipher-line);
+  border-radius: 14px;
+  background: rgba(247, 248, 251, 0.82);
+}
+
+.cipherword-board-header > div {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+}
+
+.cipherword-board-header span,
+.cipherword-streak-panel span,
+.cipherword-closest-card span,
+.metric span {
+  color: var(--cipher-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cipherword-board-header strong,
+.cipherword-streak-panel strong,
+.cipherword-closest-card strong {
+  overflow: hidden;
+  font-size: 0.95rem;
+  line-height: 1.08;
+  text-overflow: ellipsis;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.cipherword-board,
+.cipherword-empty-board {
+  min-height: 0;
+  overflow: auto;
+}
+
+.cipherword-board {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding-right: 2px;
+}
+
+.cipherword-empty-board {
+  display: grid;
+  place-items: center;
+  border: 1px dashed #cfd6e3;
+  border-radius: 16px;
+  background: #f8fafc;
+  padding: 24px;
+  text-align: center;
+}
+
+.cipherword-empty-board svg {
+  width: 30px;
+  height: 30px;
+  color: var(--cipher-blue);
+}
+
+.cipherword-empty-board strong {
+  margin-top: 10px;
+  font-size: 1.05rem;
+}
+
+.cipherword-empty-board span {
+  max-width: 360px;
+  margin-top: 6px;
+  color: var(--cipher-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.cipherword-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--cipher-line);
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.cipherword-row-summary {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.cipherword-row-summary strong {
+  overflow: hidden;
+  font-size: 0.98rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cipherword-row-summary span {
+  color: var(--cipher-muted);
+  font-size: 0.82rem;
+  font-weight: 620;
+}
+
+.cipherword-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 5px;
+}
+
+.cipherword-tile {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 8px;
+  background: #e5e7eb;
+  color: #475467;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.cipherword-tile.correct {
+  background: var(--cipher-blue);
+  color: #ffffff;
+}
+
+.cipherword-tile.present {
+  background: var(--cipher-amber);
+  color: #111827;
+}
+
+.cipherword-tile.absent {
+  background: #e5e7eb;
+}
+
+.cipherword-shape-chip {
+  justify-self: end;
+  border-radius: 999px;
+  background: #f3f6fb;
+  color: var(--cipher-muted);
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.cipherword-meter {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--cipher-line);
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.cipherword-meter-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.cipherword-meter-top span {
+  color: var(--cipher-muted);
+  font-size: 0.72rem;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
+.cipherword-meter-top strong {
+  font-size: 0.95rem;
+}
+
+.cipherword-meter-top em {
+  border-radius: 999px;
+  background: #f3f6fb;
+  color: var(--cipher-blue);
+  padding: 5px 8px;
+  font-size: 0.74rem;
+  font-style: normal;
+  font-weight: 760;
+}
+
+.cipherword-meter-track {
+  overflow: hidden;
+  height: 10px;
+  border-radius: 999px;
+  background: #e5e7eb;
+}
+
+.cipherword-meter-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #64748b, #f6c453 52%, #7c54ff);
+}
+
+.cipherword-meter p,
+.cipherword-clue-card p,
+.cipherword-result-modal > span {
+  margin: 0;
+  color: var(--cipher-muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.cipherword-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.cipherword-input-row input {
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--cipher-line);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--cipher-ink);
+  padding: 0 15px;
+  font-size: 1rem;
+  outline: 0;
+}
+
+.cipherword-input-row input:focus-visible {
+  border-color: rgba(23, 105, 224, 0.45);
+  box-shadow: 0 0 0 3px rgba(23, 105, 224, 0.12);
+}
+
+.cipherword-feedback,
+.cipherword-error {
+  min-height: 18px;
+  font-size: 0.82rem;
+  font-weight: 620;
+}
+
+.cipherword-feedback {
+  color: var(--cipher-muted);
+}
+
+.cipherword-error {
+  color: #b42318;
+}
+
+.cipherword-storage-warning {
+  padding: 10px;
+  color: #b42318;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.cipherword-streak-panel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  background:
+    radial-gradient(circle at 14% 12%, rgba(246, 196, 83, 0.22), transparent 34%),
+    #111827;
+  color: #ffffff;
+  padding: 12px;
+}
+
+.cipherword-streak-panel > svg {
+  width: 26px;
+  height: 26px;
+  color: #f6c453;
+}
+
+.cipherword-streak-panel span {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.cipherword-streak-panel strong {
+  color: #ffffff;
+}
+
+.cipherword-panel-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.cipherword-panel-heading svg {
+  width: 17px;
+  height: 17px;
+  color: var(--cipher-blue);
+}
+
+.cipherword-panel-heading h3 {
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.1;
+}
+
+.cipherword-signal-trail,
+.cipherword-stats-panel,
+.cipherword-achievement-shelf {
+  display: grid;
+  gap: 8px;
+}
+
+.cipherword-clue-list {
+  display: grid;
+  gap: 7px;
+}
+
+.cipherword-clue-card,
+.cipherword-closest-card {
+  padding: 10px;
+}
+
+.cipherword-clue-card span {
+  color: var(--cipher-blue);
+  font-size: 0.7rem;
+  font-weight: 780;
+  text-transform: uppercase;
+}
+
+.cipherword-closest-card {
+  display: grid;
+  gap: 5px;
+  background: #111827;
+  color: #ffffff;
+}
+
+.cipherword-closest-card span,
+.cipherword-closest-card em {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cipherword-closest-card em {
+  font-size: 0.78rem;
+  font-style: normal;
+}
+
+.cipherword-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.cipherword-achievement-list {
+  display: grid;
+  gap: 6px;
+}
+
+.cipherword-achievement-list article {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--cipher-line);
+  border-radius: 12px;
+  background: rgba(247, 248, 251, 0.82);
+  padding: 9px;
+}
+
+.cipherword-achievement-list article.unlocked {
+  border-color: rgba(23, 105, 224, 0.28);
+  background: #e8f1ff;
+}
+
+.cipherword-achievement-list strong {
+  font-size: 0.82rem;
+  line-height: 1.15;
+}
+
+.cipherword-achievement-list span {
+  color: var(--cipher-muted);
+  font-size: 0.72rem;
+  line-height: 1.28;
+}
+
+.cipherword-settings-panel {
+  display: grid;
+  gap: 7px;
+  padding: 10px;
+}
+
+.cipherword-settings-panel .secondary-action {
+  min-height: 40px;
+  border: 0;
+  font-size: 0.82rem;
+}
+
+.cipherword-bank-state {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  border: 1px solid var(--cipher-line);
+  border-radius: 22px;
+  background: #ffffff;
+  padding: 28px;
+  text-align: center;
+}
+
+.cipherword-bank-state svg {
+  width: 34px;
+  height: 34px;
+  color: var(--cipher-blue);
+}
+
+.cipherword-bank-state h3 {
+  margin: 12px 0 6px;
+  font-size: 1.4rem;
+}
+
+.cipherword-bank-state p {
+  margin: 0;
+  color: var(--cipher-muted);
+}
+
+.cipherword-bank-state div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.cipherword-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.34);
+  padding: 18px;
+  backdrop-filter: blur(8px);
+}
+
+.cipherword-result-modal {
+  position: relative;
+  display: grid;
+  width: min(620px, 100%);
+  max-height: min(780px, calc(100dvh - 36px));
+  gap: 12px;
+  overflow: auto;
+  border: 1px solid var(--cipher-line);
+  border-radius: 22px;
+  background: #ffffff;
+  padding: 24px;
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.22);
+}
+
+.cipherword-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: #eff1f5;
+  color: var(--cipher-ink);
+}
+
+.cipherword-modal-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.cipherword-result-modal > p {
+  margin: 0;
+  color: var(--cipher-blue);
+  font-size: 0.76rem;
+  font-weight: 780;
+  text-transform: uppercase;
+}
+
+.cipherword-result-modal h2 {
+  margin: 0;
+  padding-right: 40px;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 0.98;
+  text-transform: capitalize;
+}
+
+.cipherword-result-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cipherword-replay {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--cipher-line);
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 10px;
+}
+
+.cipherword-replay-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.cipherword-replay-track span {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 7px;
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 0 10px;
+}
+
+.cipherword-replay-track em {
+  color: var(--cipher-muted);
+  font-size: 0.76rem;
+  font-style: normal;
+  font-weight: 760;
+}
+
+.cipherword-replay-track strong {
+  font-size: 0.8rem;
+}
+
+.cipherword-unlocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cipherword-unlocks span {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 7px;
+  border-radius: 999px;
+  background: #e8f1ff;
+  color: var(--cipher-blue);
+  padding: 0 11px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.cipherword-unlocks svg {
+  width: 15px;
+  height: 15px;
+}
+
+.cipherword-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cipherword-share-fallback {
+  min-height: 110px;
+  resize: vertical;
+  border: 1px solid var(--cipher-line);
+  border-radius: 12px;
+  padding: 10px;
+  font: inherit;
+}
+
+.cipherword-archive-page {
+  height: 100svh;
+  min-height: 100svh;
+  overflow: auto;
+  background: #f7f8fb;
+  padding: 28px;
+}
+
+.cipherword-archive-hero,
+.cipherword-archive-panel {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 18px 48px rgba(20, 28, 42, 0.07);
+}
+
+.cipherword-archive-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  padding: clamp(18px, 3vw, 30px);
+}
+
+.cipherword-archive-hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 0.98;
+}
+
+.cipherword-archive-hero span {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.cipherword-archive-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cipherword-archive-panel {
+  margin-top: 18px;
+  padding: clamp(16px, 2.5vw, 26px);
+}
+
+.cipherword-archive-monthbar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.cipherword-archive-monthbar > div {
+  text-align: center;
+}
+
+.cipherword-archive-monthbar strong {
+  display: block;
+  font-size: clamp(1.2rem, 2vw, 1.7rem);
+}
+
+.cipherword-archive-monthbar span {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.cipherword-archive-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.cipherword-archive-legend span {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.cipherword-archive-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cipherword-archive-cell {
+  display: grid;
+  min-height: 76px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--text);
+  text-align: center;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.cipherword-archive-cell:not(.locked):hover,
+.cipherword-archive-cell:not(.locked):focus-visible {
+  border-color: rgba(23, 105, 224, 0.42);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.cipherword-archive-cell strong {
+  font-size: 1.18rem;
+}
+
+.cipherword-archive-cell small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.cipherword-archive-cell.solved,
+.cipherword-archive-legend .solved {
+  background: #e6f8e3;
+  color: #278f3a;
+}
+
+.cipherword-archive-cell.unsolved,
+.cipherword-archive-legend .unsolved {
+  background: #e8f1ff;
+  color: #1769e0;
+}
+
+.cipherword-archive-cell.missed,
+.cipherword-archive-legend .missed {
+  background: #fff8e4;
+  color: #8a5a00;
+}
+
+.cipherword-archive-cell.locked,
+.cipherword-archive-legend .locked {
+  background: #eff1f5;
+  color: #727985;
+}
+
+.cipherword-archive-cell.locked {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
 @media (max-width: 1280px) {
   .arcade-main {
     padding-right: 40px;
@@ -2813,6 +4133,28 @@ img {
   .discover-section-copy {
     grid-template-columns: 1fr;
     padding-bottom: 72px;
+  }
+
+  .cipherword-shell {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+
+  .cipherword-play-panel {
+    min-height: 520px;
+  }
+
+  .cipherword-side-panel {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .cipherword-archive-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .cipherword-archive-actions {
+    justify-content: flex-start;
   }
 }
 
@@ -2968,35 +4310,22 @@ img {
     font-size: 0.86rem;
   }
 
-  .snake-top-score {
+  .snake-best-panel {
     gap: 6px;
     border-radius: 13px;
     padding: 8px;
   }
 
-  .snake-top-score-header strong {
-    font-size: 0.98rem;
-  }
-
-  .snake-top-score-list {
+  .snake-best-list {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 4px;
   }
 
-  .snake-top-score-row {
-    min-height: 28px;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 2px;
-    justify-items: center;
-    padding: 3px 5px;
-    text-align: center;
-  }
-
-  .snake-top-score-row span {
+  .snake-best-list span {
     font-size: 0.62rem;
   }
 
-  .snake-top-score-row strong {
+  .snake-best-list strong {
     font-size: 0.78rem;
   }
 
@@ -3034,6 +4363,74 @@ img {
 
   .text-parallax-copy h2 {
     font-size: 3.1rem;
+  }
+
+  .cipherword-game {
+    gap: 8px;
+  }
+
+  .cipherword-toolbar,
+  .cipherword-board-header,
+  .cipherword-row,
+  .cipherword-input-row,
+  .cipherword-result-stats,
+  .cipherword-archive-monthbar {
+    grid-template-columns: 1fr;
+  }
+
+  .cipherword-toolbar-actions,
+  .cipherword-result-actions {
+    justify-content: flex-start;
+  }
+
+  .cipherword-mode-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cipherword-mode-tabs button,
+  .cipherword-mode-tabs a {
+    min-height: 34px;
+    font-size: 0.78rem;
+  }
+
+  .cipherword-play-panel {
+    min-height: 0;
+    grid-template-rows: auto minmax(220px, 1fr) auto auto auto auto;
+  }
+
+  .cipherword-row {
+    gap: 8px;
+  }
+
+  .cipherword-tiles {
+    justify-content: start;
+  }
+
+  .cipherword-cta {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .cipherword-cta-meta,
+  .cipherword-cta-action,
+  .cipherword-cta-archive {
+    width: 100%;
+  }
+
+  .cipherword-archive-page {
+    padding: 14px;
+  }
+
+  .cipherword-archive-grid {
+    gap: 6px;
+  }
+
+  .cipherword-archive-cell {
+    min-height: 58px;
+    border-radius: 10px;
+  }
+
+  .cipherword-archive-cell strong {
+    font-size: 0.98rem;
   }
 }
 
@@ -3094,11 +4491,11 @@ img {
     grid-template-columns: 98px minmax(0, 1fr);
   }
 
-  .snake-toolbar h2 {
+  .snake-title-block h2 {
     font-size: 1.08rem;
   }
 
-  .snake-toolbar > div > span,
+  .snake-title-block > div > span,
   .snake-hint {
     display: none;
   }
@@ -3111,13 +4508,49 @@ img {
     display: none;
   }
 
-  .snake-top-score-list {
+  .snake-best-list {
     display: none;
   }
 
   .snake-state-overlay {
     width: min(300px, calc(100% - 20px));
     padding: 12px;
+  }
+
+  .cipherword-toolbar h2 {
+    font-size: 1.08rem;
+  }
+
+  .cipherword-toolbar > div > span {
+    display: none;
+  }
+
+  .cipherword-mode-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cipherword-tile {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    font-size: 0.82rem;
+  }
+
+  .cipherword-meter-top {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .cipherword-stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cipherword-result-modal {
+    padding: 18px;
+  }
+
+  .cipherword-archive-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -3147,5 +4580,13 @@ img {
   .continue-card:hover .continue-image,
   .template-game-card:hover {
     transform: none;
+  }
+
+  .cipherword-row,
+  .cipherword-tile,
+  .cipherword-meter-track span,
+  .cipherword-archive-cell:hover,
+  .cipherword-cta {
+    transform: none !important;
   }
 }

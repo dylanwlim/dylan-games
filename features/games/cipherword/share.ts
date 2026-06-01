@@ -30,7 +30,7 @@ export function getShareText(result: CipherwordRoundResult) {
     `Cipherword${number} — ${scoreLine}`,
     tiers.length ? tiers.join(" → ") : "No guesses",
     compactTiers,
-    best ? `Best clue: ${best.hint.toLowerCase()}` : "Best clue: signal found",
+    best ? `Best clue: ${best.hint.toLowerCase()}` : "Best clue: solved",
     routeUrl,
   ].join("\n");
 }

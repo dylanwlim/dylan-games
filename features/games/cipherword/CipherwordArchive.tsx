@@ -9,7 +9,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   CIPHERWORD_DAILY_END_DATE,
   CIPHERWORD_DAILY_START_DATE,
-  addDaysToIsoDate,
   getCanonicalCipherwordDate,
   getCipherwordArchiveEntry,
   isoDateFromUtcOrdinal,
@@ -30,12 +29,16 @@ export function CipherwordArchive() {
     available.find((entry) => !solvedDates.includes(entry.date)) ?? available[available.length - 1];
 
   useEffect(() => {
-    try {
-      const stats = parseCipherwordStats(window.localStorage.getItem(cipherwordStatsStorageKey));
-      setSolvedDates([...stats.daily.solvedDates, ...stats.archive.solvedDates]);
-    } catch {
-      setSolvedDates([]);
-    }
+    const timeout = window.setTimeout(() => {
+      try {
+        const stats = parseCipherwordStats(window.localStorage.getItem(cipherwordStatsStorageKey));
+        setSolvedDates([...stats.daily.solvedDates, ...stats.archive.solvedDates]);
+      } catch {
+        setSolvedDates([]);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, []);
 
   const goToToday = () => setCursorMonth(todayKey.slice(0, 7));

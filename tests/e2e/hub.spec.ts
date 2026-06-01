@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("renders the hub and launches Snake", async ({ page }) => {
+test("renders the hub and launches the featured Cipherword game", async ({ page }) => {
   await page.goto("/");
 
   await expect(page).toHaveTitle(/Dylan Games/);
@@ -27,17 +27,16 @@ test("renders the hub and launches Snake", async ({ page }) => {
   await expect(page.getByText("Game Center")).toHaveCount(0);
   await expect(page.getByText("Get", { exact: true })).toHaveCount(0);
 
-  await page.getByRole("link", { name: "Play Snake from Featured" }).click();
-  await expect(page).toHaveURL(/\/games\/snake/);
-  await expect(page.getByRole("heading", { name: "Snake", level: 2 })).toBeVisible();
-  await expect(page.getByLabel(/Snake board/i)).toBeVisible();
-  await expect(page.getByLabel("Top scores")).toBeVisible();
+  await page.getByRole("link", { name: "Play Cipherword from Featured" }).click();
+  await expect(page).toHaveURL(/\/games\/cipherword/);
+  await expect(page.getByRole("heading", { name: "Daily semantic word puzzle", level: 2 })).toBeVisible();
+  await expect(page.getByLabel("Cipherword board and input")).toBeVisible();
   await expect(page.getByRole("heading", { name: "All Games" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Continue Playing" })).toHaveCount(0);
 
-  await page.getByRole("button", { name: /Start Snake/i }).click();
-  await page.keyboard.press("ArrowDown");
-  await expect(page.getByText(/Snake status: Playing/i)).toBeAttached();
+  await page.getByLabel("Enter a Cipherword guess").fill("code");
+  await page.getByRole("button", { name: "Guess" }).click();
+  await expect(page.getByText(/Different neighborhood|Right broad domain|Close conceptually|Almost there/)).toBeVisible();
 });
 
 test("filters sidebar search by fuzzy game and category names", async ({ page }) => {
@@ -83,29 +82,20 @@ test("filters sidebar search by fuzzy game and category names", async ({ page })
   await search.fill("snkae");
   await expect(page.locator('a.store-game-card[href="/games/snake"]')).toBeVisible();
   await expect(page.locator(".store-game-card", { hasText: "Minesweeper" })).toHaveCount(0);
+
+  await search.fill("semantic");
+  await expect(page.locator('a.store-game-card[href="/games/cipherword"]')).toBeVisible();
 });
 
 test("opens Snake from every Snake entry point", async ({ page }) => {
   await page.goto("/");
 
-  if ((page.viewportSize()?.width ?? 0) >= 900) {
-    await page.getByRole("link", { name: "Open Snake details" }).click();
-    await expect(page).toHaveURL(/\/games\/snake/);
-    await expect(page.getByLabel(/Snake board/i)).toBeVisible();
-  }
-
-  await page.goto("/");
   await page.getByRole("link", { name: "Resume Snake from Continue Playing" }).click();
   await expect(page).toHaveURL(/\/games\/snake/);
   await expect(page.getByRole("heading", { name: "Snake", level: 2 })).toBeVisible();
 
   await page.goto("/");
   await page.locator('a.store-game-card[href="/games/snake"]').click();
-  await expect(page).toHaveURL(/\/games\/snake/);
-  await expect(page.getByLabel(/Snake board/i)).toBeVisible();
-
-  await page.goto("/games/favorites");
-  await page.locator('a.collection-primary-action[href="/games/snake"]').click();
   await expect(page).toHaveURL(/\/games\/snake/);
   await expect(page.getByLabel(/Snake board/i)).toBeVisible();
 
@@ -123,6 +113,34 @@ test("opens Snake from every Snake entry point", async ({ page }) => {
   await page.locator('a.template-game-card[href="/games/snake"]').click();
   await expect(page).toHaveURL(/\/games\/snake/);
   await expect(page.getByLabel(/Snake board/i)).toBeVisible();
+});
+
+test("opens Cipherword from every Cipherword entry point", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByRole("link", { name: "Play Cipherword from Featured" }).click();
+  await expect(page).toHaveURL(/\/games\/cipherword/);
+  await expect(page.getByLabel("Cipherword board and input")).toBeVisible();
+
+  await page.goto("/");
+  await page.locator('a.store-game-card[href="/games/cipherword"]').click();
+  await expect(page).toHaveURL(/\/games\/cipherword/);
+
+  await page.goto("/games/favorites");
+  await page.locator('a.collection-primary-action[href="/games/cipherword"]').click();
+  await expect(page).toHaveURL(/\/games\/cipherword/);
+
+  await page.goto("/games/favorites");
+  await page.locator('a.template-game-card[href="/games/cipherword"]').click();
+  await expect(page).toHaveURL(/\/games\/cipherword/);
+
+  await page.goto("/genres/word");
+  await page.locator('a.template-game-card[href="/games/cipherword"]').click();
+  await expect(page).toHaveURL(/\/games\/cipherword/);
+
+  await page.goto("/discover");
+  await page.locator('a.template-game-card[href="/games/cipherword"]').click();
+  await expect(page).toHaveURL(/\/games\/cipherword/);
 });
 
 test("plays Snake with keyboard, modes, restart, and touch swipe", async ({ page }) => {
@@ -186,6 +204,23 @@ test("switches to a placeholder game with a finished unavailable state", async (
   ).toBeVisible();
   await page.getByRole("button", { name: "Play Snake" }).click();
   await expect(page.getByRole("heading", { name: "Snake", level: 2 })).toBeVisible();
+});
+
+test("plays Cipherword daily and opens archive", async ({ page }) => {
+  await page.goto("/games/cipherword");
+
+  await expect(page.getByLabel("Cipherword board and input")).toBeVisible();
+  await page.getByLabel("Enter a Cipherword guess").fill("cipher");
+  await page.getByRole("button", { name: "Guess" }).click();
+  await expect(page.getByRole("dialog", { name: "cipher" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Share|Copied/ })).toBeVisible();
+
+  await page.goto("/games/cipherword/archive");
+  await expect(page.getByRole("heading", { name: "Cipherword Archive" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Play Cipherword archive 2026-06-01/ })).toBeVisible();
+
+  await page.goto("/games/word-forge");
+  await expect(page).toHaveURL(/\/games\/cipherword/);
 });
 
 test("renders discover and genre pages", async ({ page }) => {

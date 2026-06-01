@@ -2,7 +2,7 @@
 
 import type { Route } from "next";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { getCanonicalCipherwordDate } from "./dailyAnswers";
 import {
@@ -44,39 +44,49 @@ export function useCipherwordGame() {
   const [lastResult, setLastResult] = useState<CipherwordRoundResult | null>(null);
   const [achievementUnlocks, setAchievementUnlocks] = useState<AchievementUnlock[]>([]);
   const [storageAvailable, setStorageAvailable] = useState(true);
-  const hydratedRef = useRef(false);
 
   const currentMode = round.mode;
   const progressKey = useMemo(() => getProgressKey(round), [round]);
   const todayKey = useMemo(() => getCanonicalCipherwordDate(), []);
 
   useEffect(() => {
-    const storedStats = readStorage(cipherwordStatsStorageKey, setStorageAvailable);
-    setStats(parseCipherwordStats(storedStats));
-    hydratedRef.current = true;
+    const timeout = window.setTimeout(() => {
+      const storedStats = readStorage(cipherwordStatsStorageKey, setStorageAvailable);
+      setStats(parseCipherwordStats(storedStats));
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
-    const mode = queryMode ?? "daily";
-    const dateKey = queryDate ?? getCanonicalCipherwordDate();
-    const recentIds = readRecentUnlimitedIds(setStorageAvailable);
-    const nextRound = createCipherwordRound({
-      mode,
-      dateKey,
-      recentUnlimitedIds: recentIds,
-      seed: Date.now(),
-    });
-    const key = getProgressKey(nextRound);
-    const rawProgress = readStorage(key, setStorageAvailable);
-    const completed = stats.completedPuzzles[nextRound.puzzleId];
-    const savedGuesses = completed?.guesses ?? parseProgress(rawProgress);
-    const replayed = savedGuesses.length
-      ? replayCipherwordGuesses(nextRound, savedGuesses)
-      : nextRound;
+    const timeout = window.setTimeout(() => {
+      const mode = queryMode ?? "daily";
+      const dateKey = queryDate ?? getCanonicalCipherwordDate();
+      const recentIds = readRecentUnlimitedIds(setStorageAvailable);
+      const nextRound = createCipherwordRound({
+        mode,
+        dateKey,
+        recentUnlimitedIds: recentIds,
+        seed: Date.now(),
+      });
+      const key = getProgressKey(nextRound);
+      const rawProgress = readStorage(key, setStorageAvailable);
+      const completed = stats.completedPuzzles[nextRound.puzzleId];
+      const savedGuesses = completed?.guesses ?? parseProgress(rawProgress);
+      const replayed = savedGuesses.length
+        ? replayCipherwordGuesses(nextRound, savedGuesses)
+        : nextRound;
 
-    setRound(replayed);
-    setLastResult(replayed.status === "won" || replayed.status === "lost" ? toCipherwordRoundResult(replayed) : null);
-    setAchievementUnlocks([]);
+      setRound(replayed);
+      setLastResult(
+        replayed.status === "won" || replayed.status === "lost"
+          ? toCipherwordRoundResult(replayed)
+          : null,
+      );
+      setAchievementUnlocks([]);
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [queryDate, queryMode, stats.completedPuzzles]);
 
   const selectMode = useCallback(
@@ -169,7 +179,6 @@ export function useCipherwordGame() {
     lastResult,
     achievementUnlocks,
     storageAvailable,
-    hydrated: hydratedRef.current,
     actions: {
       dismissResult,
       restart,

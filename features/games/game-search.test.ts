@@ -11,6 +11,7 @@ describe("game search", () => {
   it("matches games with likely misspellings", () => {
     expect(titlesFor("snkae")).toEqual(["Snake"]);
     expect(titlesFor("minesweepr")).toEqual(["Minesweeper"]);
+    expect(titlesFor("cipherwrod")).toEqual(["Cipherword"]);
   });
 
   it("matches fuzzy category searches and returns the whole category", () => {
@@ -24,6 +25,14 @@ describe("game search", () => {
   });
 
   it("finds unreleased games with in-progress language", () => {
-    expect(titlesFor("in progress")).toEqual(games.slice(1).map((game) => game.title));
+    expect(titlesFor("in progress")).toEqual(
+      games.filter((game) => game.status === "coming-soon").map((game) => game.title),
+    );
+  });
+
+  it("finds Cipherword by daily semantic archive language", () => {
+    expect(titlesFor("semantic")).toEqual(["Cipherword"]);
+    expect(titlesFor("archive")).toEqual(["Cipherword"]);
+    expect(titlesFor("wordle")).toEqual(["Cipherword"]);
   });
 });
