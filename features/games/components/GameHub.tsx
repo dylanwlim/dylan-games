@@ -346,7 +346,6 @@ export function GameHub({
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pageExiting, setPageExiting] = useState(false);
-  const [mainScrolled, setMainScrolled] = useState(false);
   const mainRef = useRef<HTMLElement | null>(null);
   const navigationTimeoutRef = useRef<number | null>(null);
   const selectedGame = useMemo(() => getGameBySlug(selectedSlug) ?? fallbackGame, [selectedSlug]);
@@ -364,39 +363,6 @@ export function GameHub({
       }
     };
   }, []);
-
-  useEffect(() => {
-    const main = mainRef.current;
-
-    if (!main) {
-      return;
-    }
-
-    let frame = 0;
-    const updateScrolled = () => {
-      frame = 0;
-      const nextScrolled = main.scrollTop > 4;
-      setMainScrolled((current) => (current === nextScrolled ? current : nextScrolled));
-    };
-    const onScroll = () => {
-      if (frame) {
-        return;
-      }
-
-      frame = window.requestAnimationFrame(updateScrolled);
-    };
-
-    updateScrolled();
-    main.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => {
-      if (frame) {
-        window.cancelAnimationFrame(frame);
-      }
-
-      main.removeEventListener("scroll", onScroll);
-    };
-  }, [contentKey]);
 
   const navigateWithMotion = useCallback(
     (href: string) => {
@@ -491,13 +457,6 @@ export function GameHub({
           searchQuery={searchQuery}
           onNavigate={navigateWithMotion}
           onSearchChange={setSearchQuery}
-        />
-        <m.div
-          className="arcade-scroll-blur"
-          aria-hidden="true"
-          initial={false}
-          animate={{ opacity: mainScrolled ? 1 : 0 }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
         />
         <m.main
           id="main-content"
@@ -602,18 +561,18 @@ function HubSidebar({
                 <label htmlFor="game-sidebar-search" className="sr-only">
                   Search games
                 </label>
+                <Search
+                  aria-hidden="true"
+                  className="game-sidebar-search-icon pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 select-none opacity-50"
+                />
                 <SidebarInput
                   id="game-sidebar-search"
                   aria-label="Search games"
                   value={searchQuery}
                   onChange={(event) => onSearchChange(event.target.value)}
                   placeholder="Search games..."
-                  className="game-sidebar-search pl-8"
+                  className="game-sidebar-search pl-9"
                   type="search"
-                />
-                <Search
-                  aria-hidden="true"
-                  className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-50"
                 />
               </SidebarGroupContent>
             </SidebarGroup>
@@ -1290,7 +1249,7 @@ function ContinuePlayingSection() {
         <DailyCipherwordCTA variant="banner" />
         <ContinueCard
           game={snake}
-          image="/art/feature-snake.svg"
+          image="/art/feature-snake.png"
           summary="Eat apples, chase streaks, and restart in one click."
         />
       </div>
