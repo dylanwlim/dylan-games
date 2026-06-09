@@ -937,12 +937,17 @@ function getInputHelper(guessCount: number, answerLength: number) {
 }
 
 function useCountdownLabel() {
-  const [label, setLabel] = useState(() => getCountdownLabel());
+  const [label, setLabel] = useState("--");
 
   useEffect(() => {
-    const interval = window.setInterval(() => setLabel(getCountdownLabel()), 30_000);
+    const updateLabel = () => setLabel(getCountdownLabel());
+    const labelFrame = window.requestAnimationFrame(updateLabel);
+    const interval = window.setInterval(updateLabel, 30_000);
 
-    return () => window.clearInterval(interval);
+    return () => {
+      window.cancelAnimationFrame(labelFrame);
+      window.clearInterval(interval);
+    };
   }, []);
 
   return label;

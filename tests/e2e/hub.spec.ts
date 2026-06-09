@@ -5,6 +5,8 @@ import {
   getCipherwordDailyAnswerForDate,
 } from "../../features/games/cipherword/daily-answers";
 
+const hydrationErrorPattern = /Hydration failed|A tree hydrated/u;
+
 test("renders the hub and launches the featured Cipher game", async ({ page }) => {
   await page.goto("/");
 
@@ -122,11 +124,22 @@ test("hydrates DWL auth links without redirect URI mismatches", async ({ page })
     })
     .toBe(`${new URL(page.url()).origin}/auth/callback?next=%2F`);
 
-  expect(
-    consoleErrors.filter((message) =>
-      message.includes("A tree hydrated but some attributes of the server rendered HTML"),
-    ),
-  ).toEqual([]);
+  expect(consoleErrors.filter((message) => hydrationErrorPattern.test(message))).toEqual([]);
+});
+
+test("hydrates Cipher countdown without text mismatches", async ({ page }) => {
+  const consoleErrors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      consoleErrors.push(message.text());
+    }
+  });
+
+  await page.goto("/games/cipher");
+
+  await expect(page.getByRole("heading", { name: "Cipher", level: 2 })).toBeVisible();
+  await expect(page.locator(".cipherword-toolbar")).toContainText(/Next puzzle in \d+h \d{2}m/u);
+  expect(consoleErrors.filter((message) => hydrationErrorPattern.test(message))).toEqual([]);
 });
 
 test("filters sidebar search by fuzzy game and category names", async ({ page }) => {
@@ -354,9 +367,10 @@ test("plays Cipher daily and opens archive", async ({ page }) => {
 
   await page.goto("/games/cipher");
 
-  await expect(page.getByLabel("Cipher board and input")).toBeVisible();
-  await page.getByLabel("Enter a Cipher guess").fill(dailyAnswer);
-  await page.getByRole("button", { name: "Guess" }).click();
+  const cipherGame = page.locator("#cipherword-play").filter({ visible: true });
+  await expect(cipherGame.getByLabel("Cipher board and input")).toBeVisible();
+  await cipherGame.getByLabel("Enter a Cipher guess").fill(dailyAnswer);
+  await cipherGame.getByRole("button", { name: "Guess" }).click();
   await expect(page.getByRole("dialog", { name: dailyAnswer })).toBeVisible();
   await expect(page.getByRole("button", { name: /Share|Copied/ })).toBeVisible();
 
