@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 
-import {
-  exchangeDwlAuthCode,
-  setDwlSessionCookie,
-} from "@/lib/dwl-auth-server";
+import { exchangeDwlAuthCode, setDwlSessionCookie } from "@/lib/dwl-auth-server";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);

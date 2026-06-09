@@ -50,7 +50,9 @@ function parseSessionToken(token: string | undefined): DwlProductSession | null 
   }
 
   try {
-    const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as DwlProductSession;
+    const session = JSON.parse(
+      Buffer.from(payload, "base64url").toString("utf8"),
+    ) as DwlProductSession;
     return session.expiresAt > Math.floor(Date.now() / 1000) ? session : null;
   } catch {
     return null;

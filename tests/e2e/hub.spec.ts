@@ -102,6 +102,33 @@ test("keeps the hub header fixed through scroll extremes", async ({ page }) => {
   await expect.poll(async () => Math.round((await readHeader()).top)).toBe(0);
 });
 
+test("hydrates DWL auth links without redirect URI mismatches", async ({ page }) => {
+  const consoleErrors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      consoleErrors.push(message.text());
+    }
+  });
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open navigation" }).click();
+
+  const signInLink = page.getByRole("link", { name: "Sign in", exact: true });
+  await expect(signInLink).toBeVisible();
+  await expect
+    .poll(async () => {
+      const href = await signInLink.getAttribute("href");
+      return href ? new URL(href).searchParams.get("redirect_uri") : null;
+    })
+    .toBe(`${new URL(page.url()).origin}/auth/callback?next=%2F`);
+
+  expect(
+    consoleErrors.filter((message) =>
+      message.includes("A tree hydrated but some attributes of the server rendered HTML"),
+    ),
+  ).toEqual([]);
+});
+
 test("filters sidebar search by fuzzy game and category names", async ({ page }) => {
   await page.goto("/");
 

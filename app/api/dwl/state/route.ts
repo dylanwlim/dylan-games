@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 
-import {
-  readDwlAppState,
-  writeDwlAppState,
-} from "@/lib/dwl-auth-server";
+import { readDwlAppState, writeDwlAppState } from "@/lib/dwl-auth-server";
 
 export const dynamic = "force-dynamic";
 

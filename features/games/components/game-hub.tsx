@@ -76,6 +76,8 @@ import {
 } from "react";
 import {
   getDwlAccountUrl,
+  getDwlAuthReturnUrl,
+  DWL_DEFAULT_AUTH_RETURN_URL,
   getDwlSignInUrl,
   getDwlSignUpUrl,
   type DwlAccountUser,
@@ -657,10 +659,16 @@ function HubSidebar({
 
 function DwlAccountSidebarItems() {
   const [user, setUser] = useState<DwlAccountUser | null>(null);
-  const authReturnPath = getCurrentAuthReturnPath();
+  const [authReturnUrl, setAuthReturnUrl] = useState(DWL_DEFAULT_AUTH_RETURN_URL);
 
   useEffect(() => {
     let cancelled = false;
+    const authReturnFrame = window.requestAnimationFrame(() => {
+      if (!cancelled) {
+        setAuthReturnUrl(getDwlAuthReturnUrl(getCurrentAuthReturnPath()));
+      }
+    });
+
     void fetch("/api/dwl/session", { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : null))
       .then((body: { user?: DwlAccountUser | null } | null) => {
@@ -672,6 +680,7 @@ function DwlAccountSidebarItems() {
 
     return () => {
       cancelled = true;
+      window.cancelAnimationFrame(authReturnFrame);
     };
   }, []);
 
@@ -680,7 +689,7 @@ function DwlAccountSidebarItems() {
       <>
         <SidebarMenuItem>
           <SidebarMenuButton asChild tooltip={user.email}>
-            <a href={getDwlAccountUrl({ returnPath: authReturnPath })}>
+            <a href={getDwlAccountUrl({ returnUrl: authReturnUrl })}>
               <UserRound aria-hidden="true" />
               <span>{user.name || user.email}</span>
             </a>
@@ -702,7 +711,7 @@ function DwlAccountSidebarItems() {
     <>
       <SidebarMenuItem>
         <SidebarMenuButton asChild tooltip="Sign in">
-          <a href={getDwlSignInUrl({ returnPath: authReturnPath })}>
+          <a href={getDwlSignInUrl({ returnUrl: authReturnUrl })}>
             <LogIn aria-hidden="true" />
             <span>Sign in</span>
           </a>
@@ -710,7 +719,7 @@ function DwlAccountSidebarItems() {
       </SidebarMenuItem>
       <SidebarMenuItem>
         <SidebarMenuButton asChild tooltip="Create account">
-          <a href={getDwlSignUpUrl({ returnPath: authReturnPath })}>
+          <a href={getDwlSignUpUrl({ returnUrl: authReturnUrl })}>
             <UserRound aria-hidden="true" />
             <span>Create account</span>
           </a>

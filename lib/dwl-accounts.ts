@@ -35,23 +35,20 @@ function getCurrentOrigin() {
 }
 
 export const DWL_ACCOUNTS_URL = withoutTrailingSlash(
-  readEnv("NEXT_PUBLIC_DWL_ACCOUNTS_URL") ||
-    readEnv("DWL_ACCOUNTS_URL") ||
-    DEFAULT_ACCOUNTS_URL,
+  readEnv("NEXT_PUBLIC_DWL_ACCOUNTS_URL") || readEnv("DWL_ACCOUNTS_URL") || DEFAULT_ACCOUNTS_URL,
 );
 export const DWL_APP_ID =
   readEnv("NEXT_PUBLIC_DWL_APP_ID") || readEnv("DWL_APP_ID") || DEFAULT_APP_ID;
 export const DWL_APP_NAME =
-  readEnv("NEXT_PUBLIC_DWL_APP_NAME") ||
-  readEnv("DWL_APP_NAME") ||
-  DEFAULT_APP_NAME;
+  readEnv("NEXT_PUBLIC_DWL_APP_NAME") || readEnv("DWL_APP_NAME") || DEFAULT_APP_NAME;
 export const DWL_AUTH_RETURN_URL =
-  readEnv("NEXT_PUBLIC_DWL_AUTH_RETURN_URL") ||
-  readEnv("DWL_AUTH_RETURN_URL");
+  readEnv("NEXT_PUBLIC_DWL_AUTH_RETURN_URL") || readEnv("DWL_AUTH_RETURN_URL");
+export const DWL_DEFAULT_AUTH_RETURN_URL =
+  DWL_AUTH_RETURN_URL || new URL(DEFAULT_RETURN_PATH, DEFAULT_APP_ORIGIN).toString();
 
 export function getDwlAuthReturnUrl(returnPath = DEFAULT_RETURN_PATH) {
-  if (returnPath === DEFAULT_RETURN_PATH && DWL_AUTH_RETURN_URL) {
-    return DWL_AUTH_RETURN_URL;
+  if (returnPath === DEFAULT_RETURN_PATH) {
+    return DWL_DEFAULT_AUTH_RETURN_URL;
   }
 
   return new URL(returnPath, getCurrentOrigin()).toString();

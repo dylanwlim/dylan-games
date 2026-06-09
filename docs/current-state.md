@@ -6,6 +6,16 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-09: Fixed the DWL account sidebar link hydration mismatch that
+  appeared in Browser/dev output. DWL auth links now start from a stable
+  server/client default callback URL and switch to the current local route only
+  after hydration, so SSR and the first client render match while local sign-in
+  still returns to the active page. Added Playwright coverage that captures
+  console errors and fails on the React hydration mismatch text while verifying
+  the local `redirect_uri`. Browser verification on `127.0.0.1:3101` showed
+  zero error/warn logs and clean dev output; `npm run validate` passed end to
+  end.
+
 - 2026-06-09: Fixed the GameHub sidebar/header regression from the Safari
   screenshots. The sidebar brand now shows only `Dylan Games`, the sidebar
   search icon is explicitly centered inside the search input with safe left
