@@ -1,6 +1,13 @@
 "use client";
 
 import { DiscoverParallaxContent } from "@/components/ui/text-parallax-content-scroll";
+import { AnimatedBackground } from "@/components/core/animated-background";
+import { BorderTrail } from "@/components/core/border-trail";
+import { Magnetic } from "@/components/core/magnetic";
+import { ProgressiveBlur } from "@/components/core/progressive-blur";
+import { Spotlight } from "@/components/core/spotlight";
+import { TextEffect, type PresetType } from "@/components/core/text-effect";
+import { TextShimmer } from "@/components/core/text-shimmer";
 import {
   Sidebar as SidebarShell,
   SidebarContent,
@@ -68,11 +75,13 @@ import {
   type FocusEvent,
   type KeyboardEvent,
   type MouseEvent,
+  createElement,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type ReactNode,
 } from "react";
 import {
   getDwlAccountUrl,
@@ -342,6 +351,81 @@ const gamePanelVariants: Variants = {
     transition: { duration: 0.16, ease: "easeIn" },
   },
 };
+
+function ComponentsText({
+  as,
+  children,
+  id,
+  className,
+  preset = "slide",
+  shouldReduceMotion,
+  delay = 0,
+}: {
+  as: "h1" | "h2" | "h3" | "p" | "span" | "strong" | "small";
+  children: string;
+  id?: string;
+  className?: string;
+  preset?: PresetType;
+  shouldReduceMotion?: boolean;
+  delay?: number;
+}) {
+  if (shouldReduceMotion) {
+    return createElement(as, { className, id }, children);
+  }
+
+  return (
+    <TextEffect
+      as={as}
+      id={id}
+      className={className}
+      preset={preset}
+      per="word"
+      delay={delay}
+      speedReveal={1.35}
+      speedSegment={1.15}
+    >
+      {children}
+    </TextEffect>
+  );
+}
+
+function ComponentsShimmer({
+  as = "span",
+  children,
+  className,
+  shouldReduceMotion,
+}: {
+  as?: "p" | "span" | "small";
+  children: string;
+  className?: string;
+  shouldReduceMotion?: boolean;
+}) {
+  if (shouldReduceMotion) {
+    return createElement(as, { className }, children);
+  }
+
+  return (
+    <TextShimmer as={as} className={className} duration={3.8} spread={1.2}>
+      {children}
+    </TextShimmer>
+  );
+}
+
+function MaybeMagnetic({ enabled, children }: { enabled: boolean; children: ReactNode }) {
+  if (!enabled) {
+    return <>{children}</>;
+  }
+
+  return (
+    <Magnetic
+      intensity={0.18}
+      range={92}
+      springOptions={{ stiffness: 180, damping: 18, mass: 0.2 }}
+    >
+      {children}
+    </Magnetic>
+  );
+}
 
 export function GameHub({
   initialSlug = "snake",
@@ -848,7 +932,9 @@ function GamesView({
   return (
     <m.div className="games-page" variants={pageCascadeVariants}>
       <m.header className="arcade-title" variants={pageItemVariants}>
-        <h1>Games</h1>
+        <ComponentsText as="h1" shouldReduceMotion={shouldReduceMotion}>
+          Games
+        </ComponentsText>
       </m.header>
 
       {focusGame ? (
@@ -1040,6 +1126,16 @@ function FeatureHero({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
         onPointerEnter={() => setHoverPaused(true)}
         onPointerLeave={() => setHoverPaused(false)}
       >
+        {!shouldReduceMotion ? (
+          <>
+            <Spotlight className="feature-components-spotlight" size={360} />
+            <BorderTrail
+              className="feature-components-border"
+              size={90}
+              transition={{ repeat: Infinity, duration: 7, ease: "linear" }}
+            />
+          </>
+        ) : null}
         <m.div
           className="feature-swipe-layer"
           drag={shouldReduceMotion ? false : "x"}
@@ -1082,19 +1178,32 @@ function FeatureHero({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
                 style={{ objectPosition: activeSlide.imagePosition }}
               />
               <div className="feature-scrim" aria-hidden="true" />
+              <ProgressiveBlur
+                aria-hidden="true"
+                className="feature-progressive-blur"
+                direction="right"
+                blurIntensity={0.55}
+                blurLayers={6}
+              />
               <div className="feature-copy">
-                <p>{activeSlide.mode}</p>
-                <h2>{activeSlide.title}</h2>
+                <ComponentsShimmer as="p" shouldReduceMotion={shouldReduceMotion}>
+                  {activeSlide.mode}
+                </ComponentsShimmer>
+                <ComponentsText as="h2" shouldReduceMotion={shouldReduceMotion}>
+                  {activeSlide.title}
+                </ComponentsText>
                 <span>{activeSlide.description}</span>
                 <div className="feature-actions">
-                  <Link
-                    className="primary-play-button"
-                    href={activeSlide.route}
-                    aria-label={activeSlide.primaryAriaLabel}
-                  >
-                    <Play aria-hidden="true" />
-                    {activeSlide.primaryCta}
-                  </Link>
+                  <MaybeMagnetic enabled={!shouldReduceMotion}>
+                    <Link
+                      className="primary-play-button"
+                      href={activeSlide.route}
+                      aria-label={activeSlide.primaryAriaLabel}
+                    >
+                      <Play aria-hidden="true" />
+                      {activeSlide.primaryCta}
+                    </Link>
+                  </MaybeMagnetic>
                   <Link
                     className="feature-secondary-button"
                     href={activeSlide.secondaryCta.route}
@@ -1249,6 +1358,7 @@ function ArcadeStorefront({
           activeGenre={effectiveGenre}
           playableOnly={!hasSearch}
           resultCount={0}
+          shouldReduceMotion={shouldReduceMotion}
           onGenreChange={onGenreChange}
         />
         <EmptyGenreState genre="Search" />
@@ -1258,15 +1368,25 @@ function ArcadeStorefront({
 
   return (
     <m.div className="arcade-storefront" {...motionProps}>
-      {!hasSearch ? <ContinuePlayingSection /> : null}
+      {!hasSearch ? <ContinuePlayingSection shouldReduceMotion={shouldReduceMotion} /> : null}
       <GenrePills
         activeGenre={effectiveGenre}
         playableOnly={!hasSearch}
         resultCount={visibleCount}
+        shouldReduceMotion={shouldReduceMotion}
         onGenreChange={onGenreChange}
       />
-      <AllGamesSection activeGenre={effectiveGenre} games={liveGames} searchQuery={searchQuery} />
-      <ComingSoonSection games={plannedGames} searching={hasSearch} />
+      <AllGamesSection
+        activeGenre={effectiveGenre}
+        games={liveGames}
+        searchQuery={searchQuery}
+        shouldReduceMotion={shouldReduceMotion}
+      />
+      <ComingSoonSection
+        games={plannedGames}
+        searching={hasSearch}
+        shouldReduceMotion={shouldReduceMotion}
+      />
     </m.div>
   );
 }
@@ -1275,10 +1395,12 @@ function AllGamesSection({
   activeGenre,
   games: sectionGames,
   searchQuery,
+  shouldReduceMotion,
 }: {
   activeGenre?: GenreSlug;
   games: GameDefinition[];
   searchQuery: string;
+  shouldReduceMotion: boolean;
 }) {
   const activeLabel = activeGenre ? getGenreBySlug(activeGenre)?.label : undefined;
   const titleId = "playable-games-title";
@@ -1292,7 +1414,9 @@ function AllGamesSection({
     >
       <div className="store-section-header">
         <div>
-          <h2 id={titleId}>{searchQuery.trim() ? "Playable results" : "Playable Games"}</h2>
+          <ComponentsText as="h2" id={titleId} shouldReduceMotion={shouldReduceMotion}>
+            {searchQuery.trim() ? "Playable results" : "Playable Games"}
+          </ComponentsText>
           <p>
             {activeLabel
               ? `${activeLabel} games that are playable in the browser right now.`
@@ -1305,7 +1429,11 @@ function AllGamesSection({
         <div className="store-card-grid live" role="list">
           {sectionGames.map((game) => (
             <m.div key={game.slug} role="listitem" variants={storefrontItemVariants}>
-              <StoreGameCard game={game} source="All Games" />
+              <StoreGameCard
+                game={game}
+                source="All Games"
+                shouldReduceMotion={shouldReduceMotion}
+              />
             </m.div>
           ))}
         </div>
@@ -1323,7 +1451,7 @@ function AllGamesSection({
   );
 }
 
-function ContinuePlayingSection() {
+function ContinuePlayingSection({ shouldReduceMotion }: { shouldReduceMotion: boolean }) {
   const snake = getGameBySlug("snake") ?? fallbackGame;
 
   return (
@@ -1334,7 +1462,13 @@ function ContinuePlayingSection() {
     >
       <div className="store-section-header compact">
         <div>
-          <h2 id="continue-playing-title">Continue Playing</h2>
+          <ComponentsText
+            as="h2"
+            id="continue-playing-title"
+            shouldReduceMotion={shouldReduceMotion}
+          >
+            Continue Playing
+          </ComponentsText>
           <p>Resume today&apos;s puzzle or jump back into your latest run.</p>
         </div>
       </div>
@@ -1462,7 +1596,15 @@ function getUpcomingDescription(game: GameDefinition) {
   return game.summary;
 }
 
-function StoreGameCard({ game, source }: { game: GameDefinition; source: string }) {
+function StoreGameCard({
+  game,
+  source,
+  shouldReduceMotion = false,
+}: {
+  game: GameDefinition;
+  source: string;
+  shouldReduceMotion?: boolean;
+}) {
   const isPlayable = game.status === "playable";
   const action = "Play";
   const statusLabel = isPlayable ? (game.daily ? "Daily" : "Arcade") : getUpcomingStage(game);
@@ -1477,6 +1619,18 @@ function StoreGameCard({ game, source }: { game: GameDefinition; source: string 
           : getUpcomingDescription(game);
   const cardContent = (
     <>
+      {!shouldReduceMotion ? (
+        <>
+          <Spotlight className="store-components-spotlight" size={190} />
+          {isPlayable ? (
+            <BorderTrail
+              className={`store-components-border accent-${game.accent}`}
+              size={54}
+              transition={{ repeat: Infinity, duration: 5.8, ease: "linear" }}
+            />
+          ) : null}
+        </>
+      ) : null}
       <ArcadeAppIcon game={game} />
       <span className="store-game-copy">
         <span className="store-game-title-row">
@@ -1518,9 +1672,11 @@ function StoreGameCard({ game, source }: { game: GameDefinition; source: string 
 function ComingSoonSection({
   games: plannedGames,
   searching,
+  shouldReduceMotion,
 }: {
   games: GameDefinition[];
   searching: boolean;
+  shouldReduceMotion: boolean;
 }) {
   if (!plannedGames.length) {
     return null;
@@ -1531,6 +1687,7 @@ function ComingSoonSection({
   const supportingGames = plannedGames
     .filter((game) => game.slug !== featuredGame.slug)
     .slice(0, 4);
+  const featuredUsesImage = featuredGame.preview === "dashline";
 
   return (
     <m.section
@@ -1540,7 +1697,9 @@ function ComingSoonSection({
     >
       <div className="store-section-header">
         <div>
-          <h2 id="coming-soon-title">{searching ? "In-progress results" : "Coming Soon"}</h2>
+          <ComponentsText as="h2" id="coming-soon-title" shouldReduceMotion={shouldReduceMotion}>
+            {searching ? "In-progress results" : "Coming Soon"}
+          </ComponentsText>
           <p>
             {searching
               ? "Unreleased matches stay visible but are disabled until they are playable."
@@ -1551,14 +1710,20 @@ function ComingSoonSection({
       <div className="coming-soon-layout">
         <article className="coming-soon-card is-disabled" data-disabled="true">
           <span className="coming-soon-status">Featured upcoming</span>
-          <span className="coming-soon-media">
-            <Image
-              src="/art/discover-racing.png"
-              alt={`${featuredGame.title} preview artwork`}
-              fill
-              sizes="(max-width: 900px) 100vw, 46vw"
-              className="coming-soon-image"
-            />
+          <span
+            className={`coming-soon-media ${featuredUsesImage ? "" : `preview-art accent-${featuredGame.accent} ${featuredGame.preview}`}`}
+          >
+            {featuredUsesImage ? (
+              <Image
+                src="/art/discover-racing.png"
+                alt={`${featuredGame.title} preview artwork`}
+                fill
+                sizes="(max-width: 900px) 100vw, 46vw"
+                className="coming-soon-image"
+              />
+            ) : (
+              <PreviewArt kind={featuredGame.preview} />
+            )}
           </span>
           <span className="coming-soon-copy">
             <small>Expected Summer 2026</small>
@@ -1574,7 +1739,11 @@ function ComingSoonSection({
           <div className="store-card-grid planned" role="list">
             {supportingGames.map((game) => (
               <m.div key={game.slug} role="listitem" variants={storefrontItemVariants}>
-                <StoreGameCard game={game} source="Coming Soon" />
+                <StoreGameCard
+                  game={game}
+                  source="Coming Soon"
+                  shouldReduceMotion={shouldReduceMotion}
+                />
               </m.div>
             ))}
           </div>
@@ -1604,6 +1773,7 @@ function CollectionView({
   searchQuery: string;
   view: Exclude<GameHubView, "games">;
 }) {
+  const shouldReduceMotion = Boolean(useReducedMotion());
   const meta = getCollectionMeta(view, activeGenre);
   const shelfGames = getCollectionGames(view, activeGenre);
   const hasSearch = Boolean(searchQuery.trim());
@@ -1619,17 +1789,24 @@ function CollectionView({
     <m.div className="collection-page" variants={pageCascadeVariants}>
       <m.header className="collection-hero" variants={pageItemVariants}>
         <div className="collection-copy">
-          <h1>{meta.title}</h1>
+          <ComponentsText as="h1" shouldReduceMotion={shouldReduceMotion}>
+            {meta.title}
+          </ComponentsText>
           <p>{meta.description}</p>
           <div className="collection-actions">
-            <Link className="collection-primary-action" href={meta.href as Route}>
-              {meta.action}
-              <ArrowUpRight aria-hidden="true" />
-            </Link>
+            <MaybeMagnetic enabled={!shouldReduceMotion}>
+              <Link className="collection-primary-action" href={meta.href as Route}>
+                {meta.action}
+                <ArrowUpRight aria-hidden="true" />
+              </Link>
+            </MaybeMagnetic>
             <span>{visibleGames.length} games shown</span>
           </div>
         </div>
         <div className={`collection-art accent-${previewArt.accent}`} aria-hidden="true">
+          {!shouldReduceMotion ? (
+            <Spotlight className="collection-components-spotlight" size={260} />
+          ) : null}
           <PreviewArt kind={previewArt.preview} />
           <span>{meta.artLabel}</span>
         </div>
@@ -1649,7 +1826,9 @@ function CollectionView({
         {meta.panels.map((panel) => (
           <article key={panel.title} className="template-panel">
             <p>{panel.label}</p>
-            <h2>{panel.title}</h2>
+            <ComponentsText as="h2" shouldReduceMotion={shouldReduceMotion}>
+              {panel.title}
+            </ComponentsText>
             <span>{panel.body}</span>
           </article>
         ))}
@@ -1663,7 +1842,13 @@ function CollectionView({
         <div className="shelf-heading">
           <div>
             <p>{meta.shelfLabel}</p>
-            <h2 id="template-shelf-title">{searchQuery ? "Search results" : meta.shelfTitle}</h2>
+            <ComponentsText
+              as="h2"
+              id="template-shelf-title"
+              shouldReduceMotion={shouldReduceMotion}
+            >
+              {searchQuery ? "Search results" : meta.shelfTitle}
+            </ComponentsText>
           </div>
           <span>{visibleGames.length} shown</span>
         </div>
@@ -1671,7 +1856,11 @@ function CollectionView({
         {visibleGames.length ? (
           <div className="template-game-grid" role="list">
             {visibleGames.map((game) => (
-              <CollectionGameCard key={game.slug} game={game} />
+              <CollectionGameCard
+                key={game.slug}
+                game={game}
+                shouldReduceMotion={shouldReduceMotion}
+              />
             ))}
           </div>
         ) : (
@@ -1692,11 +1881,13 @@ function GenrePills({
   activeGenre,
   playableOnly,
   resultCount,
+  shouldReduceMotion,
   onGenreChange,
 }: {
   activeGenre?: GenreSlug;
   playableOnly: boolean;
   resultCount: number;
+  shouldReduceMotion: boolean;
   onGenreChange: (genre: GenreSlug | undefined) => void;
 }) {
   const allCount = games.length;
@@ -1706,45 +1897,65 @@ function GenrePills({
       (game) => game.genre === genre.label && (!playableOnly || game.status === "playable"),
     ),
   );
+  const activeFilterId = activeGenre ?? "all";
+  const handleAnimatedGenreChange = (value: string | null) => {
+    if (!value || value === "all") {
+      onGenreChange(undefined);
+      return;
+    }
+
+    onGenreChange(value as GenreSlug);
+  };
 
   return (
     <nav className="genre-pills" aria-label="Game genres">
       <span className="genre-filter-label">Filter by category</span>
-      <button
-        className={`genre-pill ${!activeGenre ? "active" : ""}`}
-        type="button"
-        onClick={() => onGenreChange(undefined)}
-        aria-pressed={!activeGenre}
+      <AnimatedBackground
+        defaultValue={activeFilterId}
+        onValueChange={handleAnimatedGenreChange}
+        className="genre-pill-background"
+        transition={
+          shouldReduceMotion
+            ? { duration: 0 }
+            : { type: "spring", stiffness: 420, damping: 34, mass: 0.45 }
+        }
       >
-        <Grid2X2 aria-hidden="true" />
-        <span>All</span>
-        <small>{allCount}</small>
-      </button>
+        <button
+          data-id="all"
+          className={`genre-pill ${!activeGenre ? "active" : ""}`}
+          type="button"
+          aria-pressed={!activeGenre}
+        >
+          <Grid2X2 aria-hidden="true" />
+          <span>All</span>
+          <small>{allCount}</small>
+        </button>
+        {genresForFilters.map((genre) => {
+          const Icon = iconMap[genre.icon];
+          const genreCount = games.filter(
+            (game) => game.genre === genre.label && (!playableOnly || game.status === "playable"),
+          ).length;
+
+          return (
+            <button
+              key={genre.slug}
+              data-id={genre.slug}
+              className={`genre-pill ${activeGenre === genre.slug ? "active" : ""}`}
+              type="button"
+              aria-pressed={activeGenre === genre.slug}
+            >
+              <Icon aria-hidden="true" />
+              <span>{genre.label}</span>
+              <small>{genreCount}</small>
+            </button>
+          );
+        })}
+      </AnimatedBackground>
       <span className="genre-pill static" aria-label={`${playableCount} playable games`}>
         <Gamepad2 aria-hidden="true" />
         <span>Playable</span>
         <small>{playableCount}</small>
       </span>
-      {genresForFilters.map((genre) => {
-        const Icon = iconMap[genre.icon];
-        const genreCount = games.filter(
-          (game) => game.genre === genre.label && (!playableOnly || game.status === "playable"),
-        ).length;
-
-        return (
-          <button
-            key={genre.slug}
-            className={`genre-pill ${activeGenre === genre.slug ? "active" : ""}`}
-            type="button"
-            onClick={() => onGenreChange(genre.slug)}
-            aria-pressed={activeGenre === genre.slug}
-          >
-            <Icon aria-hidden="true" />
-            <span>{genre.label}</span>
-            <small>{genreCount}</small>
-          </button>
-        );
-      })}
       <span className="genre-result-count" aria-live="polite">
         {resultCount} {resultCount === 1 ? "result" : "results"}
       </span>
@@ -1790,10 +2001,19 @@ function GameTile({
   );
 }
 
-function CollectionGameCard({ game }: { game: GameDefinition }) {
+function CollectionGameCard({
+  game,
+  shouldReduceMotion,
+}: {
+  game: GameDefinition;
+  shouldReduceMotion: boolean;
+}) {
   const isPlayable = game.status === "playable";
   const cardContent = (
     <>
+      {!shouldReduceMotion ? (
+        <Spotlight className="template-components-spotlight" size={210} />
+      ) : null}
       <span className={`game-preview ${game.preview} accent-${game.accent}`} aria-hidden="true">
         <PreviewArt kind={game.preview} />
       </span>
@@ -1943,14 +2163,21 @@ function EmptyGenreState({ genre }: { genre: string }) {
 }
 
 function UnavailableGame({ game, onPlaySnake }: { game: GameDefinition; onPlaySnake: () => void }) {
+  const shouldReduceMotion = Boolean(useReducedMotion());
+
   return (
     <div className="unavailable-state">
       <div className={`unavailable-art ${game.preview} accent-${game.accent}`} aria-hidden="true">
+        {!shouldReduceMotion ? (
+          <Spotlight className="unavailable-components-spotlight" size={280} />
+        ) : null}
         <PreviewArt kind={game.preview} />
       </div>
       <div>
         <p>Reserved slot</p>
-        <h3>{game.title} is not playable yet.</h3>
+        <ComponentsText as="h3" shouldReduceMotion={shouldReduceMotion}>
+          {`${game.title} is not playable yet.`}
+        </ComponentsText>
         <span>{game.description}</span>
         <button className="secondary-action" type="button" onClick={onPlaySnake}>
           Play Snake
@@ -1990,41 +2217,161 @@ function PreviewArt({ kind }: { kind: GameDefinition["preview"] }) {
 
   if (kind === "minesweeper") {
     return (
-      <span className="mine-grid">
-        {Array.from({ length: 9 }, (_, index) => (
-          <i key={index}>{index === 1 ? "1" : index === 3 ? "2" : ""}</i>
-        ))}
+      <span className="mine-scene">
+        <i className="mine-radar" />
+        <span className="mine-grid">
+          {Array.from({ length: 16 }, (_, index) => (
+            <i
+              key={index}
+              className={
+                index === 1 || index === 6 || index === 8 || index === 13
+                  ? "revealed"
+                  : index === 5
+                    ? "flagged"
+                    : index === 10
+                      ? "mine"
+                      : ""
+              }
+            >
+              {index === 1 ? "1" : index === 6 ? "2" : index === 8 ? "1" : index === 13 ? "3" : ""}
+            </i>
+          ))}
+        </span>
+        <i className="mine-flag" />
+        <i className="mine-spark a" />
+        <i className="mine-spark b" />
       </span>
     );
   }
 
   if (kind === "pong") {
     return (
-      <>
+      <span className="pong-scene">
+        <i className="pong-score left" />
+        <i className="pong-score right" />
+        <i className="pong-center-line" />
         <i className="paddle left" />
         <i className="paddle right" />
+        <i className="ball-trail" />
         <i className="ball" />
-      </>
+      </span>
     );
   }
 
   if (kind === "tiles") {
     return (
-      <span className="tile-stack">
-        {Array.from({ length: 7 }, (_, index) => (
-          <i key={index} />
-        ))}
+      <span className="tiles-scene">
+        <i className="tile-ghost" />
+        <span className="tile-board">
+          {Array.from({ length: 20 }, (_, index) => (
+            <i
+              key={index}
+              className={
+                [12, 13, 14, 17].includes(index)
+                  ? "piece-a"
+                  : [10, 15, 16, 18].includes(index)
+                    ? "piece-b"
+                    : [3, 4, 8].includes(index)
+                      ? "piece-c"
+                      : ""
+              }
+            />
+          ))}
+        </span>
+        <i className="tile-drop" />
       </span>
     );
   }
 
   if (kind === "orbit") {
     return (
-      <>
-        <i className="orbit-ring" />
+      <span className="orbit-scene">
+        <i className="orbit-star a" />
+        <i className="orbit-star b" />
+        <i className="orbit-star c" />
+        <i className="orbit-ring outer" />
+        <i className="orbit-ring inner" />
         <i className="orbit-core" />
         <i className="orbit-moon" />
-      </>
+        <i className="orbit-trail" />
+      </span>
+    );
+  }
+
+  if (kind === "sky-courier") {
+    return (
+      <span className="sky-scene">
+        <i className="sky-sun" />
+        <i className="sky-cloud a" />
+        <i className="sky-cloud b" />
+        <i className="sky-route" />
+        <i className="sky-plane" />
+        <i className="sky-parcel" />
+      </span>
+    );
+  }
+
+  if (kind === "word") {
+    return (
+      <span className="word-scene">
+        <span className="word-rack">
+          {["W", "O", "R", "D"].map((letter, index) => (
+            <i key={letter} className={index === 2 ? "active" : ""}>
+              {letter}
+            </i>
+          ))}
+        </span>
+        <i className="word-cursor" />
+        <i className="word-signal" />
+      </span>
+    );
+  }
+
+  if (kind === "stack") {
+    return (
+      <span className="stack-scene">
+        <i className="stack-shadow" />
+        <span className="stack-blocks">
+          {Array.from({ length: 7 }, (_, index) => (
+            <i key={index} />
+          ))}
+        </span>
+        <i className="stack-player left" />
+        <i className="stack-player right" />
+      </span>
+    );
+  }
+
+  if (kind === "garden") {
+    return (
+      <span className="garden-scene">
+        <i className="garden-sun" />
+        <i className="garden-bed" />
+        <i className="garden-row a" />
+        <i className="garden-row b" />
+        <i className="garden-stem" />
+        <i className="garden-leaf left" />
+        <i className="garden-leaf right" />
+        <i className="garden-drop" />
+      </span>
+    );
+  }
+
+  if (kind === "route") {
+    return (
+      <span className="route-scene">
+        <span className="route-board">
+          {Array.from({ length: 12 }, (_, index) => (
+            <i key={index} className={[2, 7, 9].includes(index) ? "blocked" : ""} />
+          ))}
+        </span>
+        <i className="route-line a" />
+        <i className="route-line b" />
+        <i className="route-line c" />
+        <i className="route-node start" />
+        <i className="route-node mid" />
+        <i className="route-node end" />
+      </span>
     );
   }
 
@@ -2038,65 +2385,15 @@ function PreviewArt({ kind }: { kind: GameDefinition["preview"] }) {
     );
   }
 
-  if (kind === "sky-courier") {
-    return (
-      <>
-        <i className="sky-cloud a" />
-        <i className="sky-cloud b" />
-        <i className="sky-plane" />
-        <i className="sky-route" />
-      </>
-    );
-  }
-
-  if (kind === "word") {
-    return (
-      <span className="word-rack">
-        {["W", "O", "R", "D"].map((letter) => (
-          <i key={letter}>{letter}</i>
-        ))}
-      </span>
-    );
-  }
-
-  if (kind === "stack") {
-    return (
-      <span className="stack-blocks">
-        {Array.from({ length: 5 }, (_, index) => (
-          <i key={index} />
-        ))}
-      </span>
-    );
-  }
-
-  if (kind === "garden") {
-    return (
-      <>
-        <i className="garden-bed" />
-        <i className="garden-stem" />
-        <i className="garden-leaf left" />
-        <i className="garden-leaf right" />
-      </>
-    );
-  }
-
-  if (kind === "route") {
-    return (
-      <>
-        <i className="route-line a" />
-        <i className="route-line b" />
-        <i className="route-node start" />
-        <i className="route-node mid" />
-        <i className="route-node end" />
-      </>
-    );
-  }
-
   return (
-    <>
-      <i className="path-ring" />
-      <i className="path-number">2048</i>
-    </>
+    <span className="number-scene">
+      <span className="number-board">
+        {["2", "4", "8", "16"].map((value) => (
+          <i key={value}>{value}</i>
+        ))}
+      </span>
+      <i className="number-glow" />
+    </span>
   );
 }
 
