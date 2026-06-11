@@ -7732,7 +7732,11 @@ img {
   border: 1px solid var(--line);
   border-radius: 18px;
   background:
-    radial-gradient(circle at 78% 18%, color-mix(in srgb, var(--game-accent, var(--green)), transparent 74%), transparent 34%),
+    radial-gradient(
+      circle at 78% 18%,
+      color-mix(in srgb, var(--game-accent, var(--green)), transparent 74%),
+      transparent 34%
+    ),
     linear-gradient(135deg, var(--surface) 0%, var(--surface-muted) 100%);
   padding: clamp(24px, 4vw, 52px);
   box-shadow: var(--shadow);
@@ -7814,7 +7818,12 @@ img {
   background:
     linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-    radial-gradient(circle at 32% 24%, color-mix(in srgb, var(--game-accent, var(--green)), transparent 76%), transparent 38%), #111a27;
+    radial-gradient(
+      circle at 32% 24%,
+      color-mix(in srgb, var(--game-accent, var(--green)), transparent 76%),
+      transparent 38%
+    ),
+    #111a27;
   background-size:
     24px 24px,
     24px 24px,
@@ -8474,7 +8483,9 @@ img {
   border-radius: 999px;
   background: #f8fafc;
   color: #1f2937;
-  box-shadow: 0 0 0 8px rgba(248, 250, 252, 0.14), 0 12px 28px rgba(0, 0, 0, 0.28);
+  box-shadow:
+    0 0 0 8px rgba(248, 250, 252, 0.14),
+    0 12px 28px rgba(0, 0, 0, 0.28);
   transition:
     left 120ms linear,
     top 120ms linear,
@@ -8542,7 +8553,9 @@ img {
 
 .meadow-spawn-marker.in-range button {
   border-color: rgba(134, 217, 105, 0.72);
-  box-shadow: 0 0 0 7px rgba(134, 217, 105, 0.12), 0 12px 28px rgba(0, 0, 0, 0.22);
+  box-shadow:
+    0 0 0 7px rgba(134, 217, 105, 0.12),
+    0 12px 28px rgba(0, 0, 0, 0.22);
 }
 
 .meadow-spawn-marker.respawning {

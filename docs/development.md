@@ -28,10 +28,11 @@ The local app runs at `http://localhost:3000` by default.
 
 ## Game Architecture
 
-Game rules should be deterministic and testable outside React. The starter
-Snake implementation keeps movement, collision, scoring, and food placement in
-`features/games/snake/snake-engine.ts`; React owns rendering, controls, local
-storage, and motion.
+Game rules should be deterministic and testable outside React. Snake keeps
+movement, collision, scoring, and food placement in
+`features/games/snake/snake-engine.ts`; Meadow keeps production, pressure,
+runner, and objective rules in `features/games/meadow/meadow-engine.ts`.
+React owns rendering, controls, local storage, and motion.
 
 Cross-game XP and achievements live in `features/games/progression.ts` and are
 persisted under the `games:progression-v1` localStorage key. `DwlGameSync`

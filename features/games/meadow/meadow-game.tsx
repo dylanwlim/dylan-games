@@ -11,7 +11,6 @@ import {
   RotateCcw,
   ShieldAlert,
   Sparkles,
-  Sprout,
   Timer,
   Trophy,
   Users,
@@ -36,7 +35,6 @@ import {
   meadowStorageCap,
   pressureLabel,
   type MeadowAction,
-  type MeadowItemId,
   type MeadowObjective,
   type MeadowSpawn,
   type MeadowStatus,
@@ -69,7 +67,9 @@ export function MeadowGame({ menuOpen = false }: MeadowGameProps) {
     () => objectives.find((objective) => objective.state === "active") ?? objectives[0],
     [objectives],
   );
-  const completedObjectiveCount = objectives.filter((objective) => objective.state === "complete").length;
+  const completedObjectiveCount = objectives.filter(
+    (objective) => objective.state === "complete",
+  ).length;
   const storageUsed = inventoryUsed(state.inventory);
   const statusLabel = getStatusLabel(state.status);
   const rareFeed = state.spawns.find((spawn) => spawn.id === "rare-feed") ?? state.spawns[0];
@@ -200,7 +200,13 @@ export function MeadowGame({ menuOpen = false }: MeadowGameProps) {
             <OutpostMarker />
             <RunnerMarker x={state.runner.x} y={state.runner.y} status={state.runner.status} />
             {state.spawns.map((spawn) => (
-              <SpawnMarker key={spawn.id} spawn={spawn} state={state} onMove={dispatch} onClaim={dispatch} />
+              <SpawnMarker
+                key={spawn.id}
+                spawn={spawn}
+                state={state}
+                onMove={dispatch}
+                onClaim={dispatch}
+              />
             ))}
             <RivalMarker pressure={state.pressure} />
           </div>
@@ -212,14 +218,20 @@ export function MeadowGame({ menuOpen = false }: MeadowGameProps) {
               transition={{ duration: 0.18, ease: "easeOut" }}
             >
               <span>{state.status === "complete" ? "Run banked" : "Land-rush production"}</span>
-              <strong>{state.status === "complete" ? "Meadow stabilized." : "Start the outpost shift."}</strong>
+              <strong>
+                {state.status === "complete" ? "Meadow stabilized." : "Start the outpost shift."}
+              </strong>
               <p>
                 {state.status === "complete"
                   ? `Final influence ${runResult.score.toLocaleString()}. Progress has been saved to DWL Accounts sync.`
                   : "Build Coop, buy Feed and Chicken, produce Eggs, claim Rare Feed, then sell goods."}
               </p>
               <button className="primary-action" type="button" onClick={actions.togglePlay}>
-                {state.status === "complete" ? <RotateCcw aria-hidden="true" /> : <Play aria-hidden="true" />}
+                {state.status === "complete" ? (
+                  <RotateCcw aria-hidden="true" />
+                ) : (
+                  <Play aria-hidden="true" />
+                )}
                 <span>{state.status === "complete" ? "New run" : "Start Meadow"}</span>
                 <kbd>Space</kbd>
               </button>
@@ -235,7 +247,9 @@ export function MeadowGame({ menuOpen = false }: MeadowGameProps) {
             </div>
             <div className="meadow-run-summary-meta">
               <span>{formatMeadowClock(state.elapsedMs)}</span>
-              <span>{completedObjectiveCount}/{objectives.length} objectives</span>
+              <span>
+                {completedObjectiveCount}/{objectives.length} objectives
+              </span>
               <span>{pressureLabel(state.pressure)}</span>
             </div>
           </section>
@@ -252,7 +266,11 @@ export function MeadowGame({ menuOpen = false }: MeadowGameProps) {
             <MeadowMetric Icon={Egg} label="Eggs" value={String(state.inventory.eggs)} />
             <MeadowMetric Icon={Wheat} label="Wheat" value={String(state.inventory.wheat)} />
             <MeadowMetric Icon={Users} label="Roster" value={`${state.tier}/4`} />
-            <MeadowMetric Icon={ShieldAlert} label="Pressure" value={`${Math.round(state.pressure)}%`} />
+            <MeadowMetric
+              Icon={ShieldAlert}
+              label="Pressure"
+              value={`${Math.round(state.pressure)}%`}
+            />
           </div>
 
           <section className="meadow-action-panel" aria-label="Outpost actions">
@@ -263,21 +281,43 @@ export function MeadowGame({ menuOpen = false }: MeadowGameProps) {
               </small>
             </div>
             <div className="meadow-action-grid">
-              <ActionButton label="Build Coop" shortcut="1" onClick={() => dispatch({ type: "build-coop" })} />
-              <ActionButton label="Buy Feed" shortcut="2" onClick={() => dispatch({ type: "buy-feed" })} />
-              <ActionButton label="Buy Chicken" shortcut="3" onClick={() => dispatch({ type: "buy-chicken" })} />
-              <ActionButton label="Plant Wheat" shortcut="4" onClick={() => dispatch({ type: "plant-wheat" })} />
-              <ActionButton label="Harvest Wheat" shortcut="H" onClick={() => dispatch({ type: "harvest-wheat" })} />
-              <ActionButton label="Sell Goods" shortcut="S" onClick={() => dispatch({ type: "sell-goods" })} />
+              <ActionButton
+                label="Build Coop"
+                shortcut="1"
+                onClick={() => dispatch({ type: "build-coop" })}
+              />
+              <ActionButton
+                label="Buy Feed"
+                shortcut="2"
+                onClick={() => dispatch({ type: "buy-feed" })}
+              />
+              <ActionButton
+                label="Buy Chicken"
+                shortcut="3"
+                onClick={() => dispatch({ type: "buy-chicken" })}
+              />
+              <ActionButton
+                label="Plant Wheat"
+                shortcut="4"
+                onClick={() => dispatch({ type: "plant-wheat" })}
+              />
+              <ActionButton
+                label="Harvest Wheat"
+                shortcut="H"
+                onClick={() => dispatch({ type: "harvest-wheat" })}
+              />
+              <ActionButton
+                label="Sell Goods"
+                shortcut="S"
+                onClick={() => dispatch({ type: "sell-goods" })}
+              />
             </div>
           </section>
 
           <section className="meadow-action-panel" aria-label="Runner actions">
             <div className="meadow-panel-heading">
               <span>Runner</span>
-              <small>
-                Claim range {meadowClaimRange}u
-              </small>
+              <small>Claim range {meadowClaimRange}u</small>
             </div>
             <div className="meadow-action-grid">
               <ActionButton
@@ -290,8 +330,15 @@ export function MeadowGame({ menuOpen = false }: MeadowGameProps) {
                 shortcut="C"
                 onClick={() => rareFeed && dispatch({ type: "claim-spawn", spawnId: rareFeed.id })}
               />
-              <ActionButton label="Add Helper" onClick={() => dispatch({ type: "invite-helper" })} />
-              <ActionButton label="Guard Outpost" shortcut="G" onClick={() => dispatch({ type: "drive-off-rival" })} />
+              <ActionButton
+                label="Add Helper"
+                onClick={() => dispatch({ type: "invite-helper" })}
+              />
+              <ActionButton
+                label="Guard Outpost"
+                shortcut="G"
+                onClick={() => dispatch({ type: "drive-off-rival" })}
+              />
             </div>
           </section>
 
@@ -310,7 +357,11 @@ export function MeadowGame({ menuOpen = false }: MeadowGameProps) {
 
           <div className="meadow-run-actions">
             <button className="primary-action" type="button" onClick={actions.togglePlay}>
-              {state.status === "playing" ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
+              {state.status === "playing" ? (
+                <Pause aria-hidden="true" />
+              ) : (
+                <Play aria-hidden="true" />
+              )}
               <span>{state.status === "playing" ? "Pause" : "Start"}</span>
               <kbd>Space</kbd>
             </button>
@@ -397,7 +448,9 @@ function SpawnMarker({
         type="button"
         aria-label={`${inRange ? "Claim" : "Move to"} ${spawnName(spawn)}`}
         onClick={() =>
-          inRange ? onClaim({ type: "claim-spawn", spawnId: spawn.id }) : onMove({ type: "move-runner", spawnId: spawn.id })
+          inRange
+            ? onClaim({ type: "claim-spawn", spawnId: spawn.id })
+            : onMove({ type: "move-runner", spawnId: spawn.id })
         }
       >
         <span>{spawnName(spawn)}</span>
@@ -419,15 +472,7 @@ function RivalMarker({ pressure }: { pressure: number }) {
   );
 }
 
-function MeadowMetric({
-  Icon,
-  label,
-  value,
-}: {
-  Icon: LucideIcon;
-  label: string;
-  value: string;
-}) {
+function MeadowMetric({ Icon, label, value }: { Icon: LucideIcon; label: string; value: string }) {
   return (
     <div className="meadow-metric">
       <span>
@@ -460,7 +505,11 @@ function ObjectiveRow({ objective }: { objective: MeadowObjective }) {
   return (
     <article className={`meadow-objective-row state-${objective.state}`}>
       <span>
-        {objective.state === "complete" ? <Trophy aria-hidden="true" /> : <Timer aria-hidden="true" />}
+        {objective.state === "complete" ? (
+          <Trophy aria-hidden="true" />
+        ) : (
+          <Timer aria-hidden="true" />
+        )}
       </span>
       <div>
         <strong>{objective.label}</strong>
@@ -482,7 +531,10 @@ function ProgressionPanel({
   unlockedCount: number;
 }) {
   return (
-    <section className="snake-progression-panel meadow-progression-panel" aria-label="Account progression">
+    <section
+      className="snake-progression-panel meadow-progression-panel"
+      aria-label="Account progression"
+    >
       <div>
         <span>
           <Sparkles aria-hidden="true" />

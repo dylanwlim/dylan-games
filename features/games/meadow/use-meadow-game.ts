@@ -29,10 +29,14 @@ export function useMeadowGame() {
   }, []);
 
   useEffect(() => {
-    const storedState = parseMeadowState(window.localStorage.getItem(meadowStateKey));
-    stateRef.current = storedState;
-    setState(storedState);
-    storageLoadedRef.current = true;
+    const timeout = window.setTimeout(() => {
+      const storedState = parseMeadowState(window.localStorage.getItem(meadowStateKey));
+      stateRef.current = storedState;
+      setState(storedState);
+      storageLoadedRef.current = true;
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, []);
 
   useEffect(() => {

@@ -54,7 +54,8 @@ test("renders the stripped Games hub with the updated sidebar", async ({ page })
   await expect(page).toHaveTitle(/Dylan Games/);
   await expect(page.getByRole("heading", { name: "Games", level: 1 })).toBeVisible();
   await expect(page.getByRole("region", { name: "Featured games" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Play Snake from showcase" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Play Meadow from showcase" })).toBeVisible();
+  await expect(page.locator('a.available-game-card[href="/games/meadow"]')).toBeVisible();
   await expect(page.locator('a.available-game-card[href="/games/snake"]')).toBeVisible();
   await expect(page.getByRole("heading", { name: "Continue Playing" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Coming Soon" })).toHaveCount(0);
@@ -63,6 +64,7 @@ test("renders the stripped Games hub with the updated sidebar", async ({ page })
   const sidebar = page.locator("#arcade-sidebar");
   await expect(sidebar.getByRole("link", { name: "Achievements" })).toBeVisible();
   await expect(sidebar.getByText("Games", { exact: true })).toHaveCount(2);
+  await expect(sidebar.getByRole("link", { name: "Meadow", exact: true })).toBeVisible();
   await expect(sidebar.getByRole("link", { name: "Snake", exact: true })).toBeVisible();
   await expect(sidebar.getByRole("link", { name: "Favorites" })).toHaveCount(0);
   await expect(sidebar.getByRole("link", { name: "Discover" })).toHaveCount(0);
@@ -71,8 +73,12 @@ test("renders the stripped Games hub with the updated sidebar", async ({ page })
   const search = page.getByLabel("Search games");
   await search.fill("snake");
   await expect(page.locator('a.available-game-card[href="/games/snake"]')).toBeVisible();
+  await expect(page.locator('a.available-game-card[href="/games/meadow"]')).toHaveCount(0);
+  await search.fill("meadow");
+  await expect(page.locator('a.available-game-card[href="/games/meadow"]')).toBeVisible();
   await search.fill("cipher");
   await expect(page.locator('a.available-game-card[href="/games/snake"]')).toHaveCount(0);
+  await expect(page.locator('a.available-game-card[href="/games/meadow"]')).toHaveCount(0);
 
   expect(consoleErrors.filter((message) => hydrationErrorPattern.test(message))).toEqual([]);
 });
@@ -85,6 +91,43 @@ test("requires a DWL Accounts session before Snake can be played", async ({ page
   await expect(
     page.locator(".account-gate").getByRole("link", { name: "Sign in" }),
   ).toHaveAttribute("href", /accounts\.dylanwlim\.com\/sign-in/);
+});
+
+test("requires a DWL Accounts session before Meadow can be played", async ({ page }) => {
+  await page.goto("/games/meadow");
+
+  await expect(page.getByRole("heading", { name: "Sign in to play Meadow." })).toBeVisible();
+  await expect(page.getByLabel(/Meadow board/i)).toHaveCount(0);
+  await expect(
+    page.locator(".account-gate").getByRole("link", { name: "Sign in" }),
+  ).toHaveAttribute("href", /accounts\.dylanwlim\.com\/sign-in/);
+});
+
+test("plays Meadow with a DWL Accounts session", async ({ page }) => {
+  await signInWithDwlSession(page);
+  await page.goto("/games/meadow");
+
+  await expect(page.getByLabel(/Meadow board/i)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Meadow", level: 2 })).toBeVisible();
+  await expect(page.getByLabel("Account progression")).toBeVisible();
+
+  await page.getByRole("button", { name: /Start Meadow/i }).click();
+  const outpostActions = page.getByLabel("Outpost actions");
+  const runnerActions = page.getByLabel("Runner actions");
+  await outpostActions.getByRole("button", { name: /Build Coop/i }).click();
+  await outpostActions.getByRole("button", { name: /Buy Feed/i }).click();
+  await outpostActions.getByRole("button", { name: /Buy Chicken/i }).click();
+  await expect(page.getByText(/First Egg cycle produced/i)).toBeVisible({ timeout: 12_000 });
+  await runnerActions.getByRole("button", { name: /Move Rare Feed/i }).click();
+  await expect(runnerActions.getByRole("button", { name: /Claim Rare Feed/i })).toBeVisible();
+  await page.waitForTimeout(3_200);
+  await runnerActions.getByRole("button", { name: /Claim Rare Feed/i }).click();
+  await expect(page.getByText(/Rare Feed claimed/i)).toBeVisible();
+  await outpostActions.getByRole("button", { name: /Sell Goods/i }).click();
+  await expect(page.getByText(/Sold goods for/i)).toBeVisible();
+  await expect(page.getByRole("button", { name: /Bank Run/i })).toBeEnabled();
+  await page.getByRole("button", { name: /Bank Run/i }).click();
+  await expect(page.locator(".meadow-state-overlay").getByText("Meadow stabilized.")).toBeVisible();
 });
 
 test("plays Snake with a DWL Accounts session", async ({ page }) => {
@@ -123,12 +166,25 @@ test("renders achievements from synced game progression", async ({ page }) => {
       "games:progression-v1",
       JSON.stringify({
         achievements: {
+          "meadow-first-shift": {
+            unlockedAt: new Date().toISOString(),
+            xp: 30,
+          },
           "snake-first-run": {
             unlockedAt: new Date().toISOString(),
             xp: 25,
           },
         },
         games: {
+          meadow: {
+            bestScore: 280,
+            cashBanked: 180,
+            claimedSpawns: 1,
+            completedRuns: 1,
+            maxTier: 3,
+            objectivesCompleted: 4,
+            xp: 110,
+          },
           snake: {
             bestScore: 80,
             completedRuns: 2,
@@ -138,7 +194,7 @@ test("renders achievements from synced game progression", async ({ page }) => {
           },
         },
         level: 2,
-        totalXp: 145,
+        totalXp: 255,
         updatedAt: new Date().toISOString(),
         version: 1,
       }),
@@ -148,9 +204,12 @@ test("renders achievements from synced game progression", async ({ page }) => {
   await page.goto("/achievements");
 
   await expect(page.getByRole("heading", { name: "Achievements", level: 1 })).toBeVisible();
-  await expect(page.getByText("145")).toBeVisible();
+  await expect(page.getByText("255")).toBeVisible();
+  await expect(
+    page.locator(".achievement-card.unlocked", { hasText: "First Shift" }),
+  ).toBeVisible();
   await expect(page.locator(".achievement-card.unlocked", { hasText: "First Run" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Play Snake" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Play Meadow" })).toBeVisible();
 });
 
 test("supports light and dark color schemes", async ({ page }) => {

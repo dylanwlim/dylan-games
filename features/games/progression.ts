@@ -224,8 +224,7 @@ export function recordMeadowRun(
   const meadow: MeadowProgression = {
     bestScore: Math.max(current.games.meadow.bestScore, Math.max(0, Math.floor(run.score))),
     cashBanked: current.games.meadow.cashBanked + Math.max(0, Math.floor(run.cash)),
-    claimedSpawns:
-      current.games.meadow.claimedSpawns + Math.max(0, Math.floor(run.claimedSpawns)),
+    claimedSpawns: current.games.meadow.claimedSpawns + Math.max(0, Math.floor(run.claimedSpawns)),
     completedRuns: current.games.meadow.completedRuns + 1,
     maxTier: Math.max(current.games.meadow.maxTier, Math.max(1, Math.floor(run.maxTier))),
     objectivesCompleted: Math.max(

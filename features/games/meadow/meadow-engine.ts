@@ -262,7 +262,11 @@ export function advanceMeadow(state: MeadowState, deltaMs: number): MeadowState 
 export function applyMeadowAction(state: MeadowState, action: MeadowAction): MeadowState {
   if (action.type === "bank-run") {
     if (!isMeadowStabilized(state)) {
-      return addEvent(state, "Finish the active Meadow objectives before banking the run.", "warning");
+      return addEvent(
+        state,
+        "Finish the active Meadow objectives before banking the run.",
+        "warning",
+      );
     }
 
     const finalScore = computeMeadowScore(state);
@@ -368,7 +372,9 @@ export function applyMeadowAction(state: MeadowState, action: MeadowAction): Mea
   }
 
   if (action.type === "harvest-wheat") {
-    const readyCrops = workingState.crops.filter((crop) => crop.readyAtMs <= workingState.elapsedMs);
+    const readyCrops = workingState.crops.filter(
+      (crop) => crop.readyAtMs <= workingState.elapsedMs,
+    );
     const readyQty = readyCrops.reduce((total, crop) => total + crop.qty, 0);
 
     if (readyQty <= 0) {
@@ -454,7 +460,8 @@ export function applyMeadowAction(state: MeadowState, action: MeadowAction): Mea
       return addEvent(workingState, "The Meadow roster is already at Tier 4.", "warning");
     }
 
-    const helperName = helperNames[workingState.helpers.length] ?? `Helper ${workingState.helpers.length + 1}`;
+    const helperName =
+      helperNames[workingState.helpers.length] ?? `Helper ${workingState.helpers.length + 1}`;
     const nextTier = normalizeTier(workingState.tier + 1);
 
     workingState = addEvent(
@@ -495,7 +502,8 @@ export function applyMeadowAction(state: MeadowState, action: MeadowAction): Mea
 
 export function getMeadowObjectives(state: MeadowState): MeadowObjective[] {
   const hasOutpost = state.coopBuilt && state.chickens > 0 && state.inventory.feed > 0;
-  const hasFirstEgg = state.completedObjectiveIds.includes("first-eggs") || state.inventory.eggs > 0;
+  const hasFirstEgg =
+    state.completedObjectiveIds.includes("first-eggs") || state.inventory.eggs > 0;
   const hasRareFeed = state.completedObjectiveIds.includes("rare-feed");
   const hasMarketSale = state.completedObjectiveIds.includes("market-sale");
   const hasHelper = state.completedObjectiveIds.includes("helper-tier");
@@ -512,7 +520,9 @@ export function getMeadowObjectives(state: MeadowState): MeadowObjective[] {
     {
       id: "first-eggs",
       label: "Produce the first Eggs",
-      detail: hasFirstEgg ? "Egg production has started." : "Keep Feed stocked while the Chicken cycle runs.",
+      detail: hasFirstEgg
+        ? "Egg production has started."
+        : "Keep Feed stocked while the Chicken cycle runs.",
       state: hasOutpost ? (hasFirstEgg ? "complete" : "active") : "blocked",
     },
     {
@@ -526,7 +536,9 @@ export function getMeadowObjectives(state: MeadowState): MeadowObjective[] {
     {
       id: "market-sale",
       label: "Sell into the market",
-      detail: hasMarketSale ? "Cash loop is proven." : "Sell Eggs, Wheat, Scrap, or Parts once inventory is ready.",
+      detail: hasMarketSale
+        ? "Cash loop is proven."
+        : "Sell Eggs, Wheat, Scrap, or Parts once inventory is ready.",
       state: hasFirstEgg ? (hasMarketSale ? "complete" : "active") : "upcoming",
     },
     {
@@ -546,8 +558,9 @@ export function getMeadowRunResult(state: MeadowState): MeadowRunResult {
     claimedSpawns: state.spawns.filter((spawn) => spawn.claimedAtMs !== null).length,
     elapsedMs: state.elapsedMs,
     maxTier: state.tier,
-    objectivesCompleted: getMeadowObjectives(state).filter((objective) => objective.state === "complete")
-      .length,
+    objectivesCompleted: getMeadowObjectives(state).filter(
+      (objective) => objective.state === "complete",
+    ).length,
     score: state.finalScore ?? computeMeadowScore(state),
   };
 }
@@ -563,12 +576,23 @@ export function computeMeadowScore(state: MeadowState) {
 
   return Math.max(
     0,
-    Math.round(state.cash + inventoryValue + state.chickens * 18 + state.tier * 20 + claimedSpawnScore + objectiveScore),
+    Math.round(
+      state.cash +
+        inventoryValue +
+        state.chickens * 18 +
+        state.tier * 20 +
+        claimedSpawnScore +
+        objectiveScore,
+    ),
   );
 }
 
 export function isMeadowStabilized(state: MeadowState) {
-  const completed = new Set(getMeadowObjectives(state).filter((objective) => objective.state === "complete").map((objective) => objective.id));
+  const completed = new Set(
+    getMeadowObjectives(state)
+      .filter((objective) => objective.state === "complete")
+      .map((objective) => objective.id),
+  );
   return (
     completed.has("outpost-online") &&
     completed.has("first-eggs") &&
@@ -612,7 +636,9 @@ function normalizeMeadowState(value: unknown): MeadowState {
 
   return updateObjectives({
     ...initial,
-    activity: Array.isArray(input.activity) ? input.activity.slice(0, 8).flatMap(normalizeEvent) : initial.activity,
+    activity: Array.isArray(input.activity)
+      ? input.activity.slice(0, 8).flatMap(normalizeEvent)
+      : initial.activity,
     cash: normalizeNumber(input.cash, initial.cash),
     chickens: normalizeNumber(input.chickens, initial.chickens),
     completedObjectiveIds: normalizeObjectiveIds(input.completedObjectiveIds),
@@ -620,14 +646,18 @@ function normalizeMeadowState(value: unknown): MeadowState {
     crops: Array.isArray(input.crops) ? input.crops.flatMap(normalizeCrop) : [],
     elapsedMs: normalizeNumber(input.elapsedMs, 0),
     eventCounter: normalizeNumber(input.eventCounter, 1),
-    finalScore: typeof input.finalScore === "number" && Number.isFinite(input.finalScore) ? input.finalScore : null,
+    finalScore:
+      typeof input.finalScore === "number" && Number.isFinite(input.finalScore)
+        ? input.finalScore
+        : null,
     helpers: Array.isArray(input.helpers) ? input.helpers.flatMap(normalizeHelper).slice(0, 3) : [],
     inventory: normalizeInventory(input.inventory),
     pressure: Math.max(0, Math.min(100, normalizeNumber(input.pressure, initial.pressure))),
     productionRemainderMs: normalizeNumber(input.productionRemainderMs, 0),
     runner: normalizeRunner(input.runner),
     spawns: Array.isArray(input.spawns) ? input.spawns.flatMap(normalizeSpawn) : initial.spawns,
-    status: input.status === "complete" ? "complete" : input.status === "paused" ? "paused" : "ready",
+    status:
+      input.status === "complete" ? "complete" : input.status === "paused" ? "paused" : "ready",
     tier,
     version: 1,
   });
@@ -827,7 +857,11 @@ function addEvent(state: MeadowState, text: string, tone: MeadowTone): MeadowSta
   };
 }
 
-function addInventory(inventory: MeadowInventory, itemId: MeadowItemId, qty: number): MeadowInventory {
+function addInventory(
+  inventory: MeadowInventory,
+  itemId: MeadowItemId,
+  qty: number,
+): MeadowInventory {
   const used = inventoryUsed(inventory);
   const available = Math.max(0, meadowStorageCap - used);
   const added = Math.min(available, Math.max(0, qty));

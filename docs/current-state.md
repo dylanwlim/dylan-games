@@ -6,6 +6,19 @@ that changes or verifies the project.
 
 ## Latest Update
 
+- 2026-06-10: Consolidated Meadow into Dylan Games as a production browser
+  game at `/games/meadow`. The hub now launches Meadow first, keeps Snake
+  available, gates both play surfaces behind DWL Accounts, and syncs Meadow
+  run state/progression through the existing account app-state bridge using
+  the `games:*` localStorage namespace. Meadow is a deterministic client game
+  with tested production, runner, spawn contention, helper-tier pressure,
+  banking, XP, and achievement flows. Updated docs now describe account-gated
+  playable games instead of a Snake-only hub. Validation passed
+  `npm run validate`; Browser desktop/mobile checks verified the hub and
+  signed-out Meadow account gate without horizontal overflow. Production
+  deployment `dpl_JABTMK6tzUgCeVTF3mwoKFbsykAH` was aliased to
+  `https://games.dylanwlim.com`.
+
 - 2026-06-10: Scrapped the hub back to the preserved sidebar/auth shell plus
   Snake-only game surfaces. The sidebar now has Library links for Games and
   Achievements, and the old Genres section is replaced by a Games section with

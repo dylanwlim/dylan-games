@@ -22,9 +22,9 @@ describe("meadow engine", () => {
 
     expect(state.inventory.eggs).toBe(1);
     expect(state.inventory.feed).toBe(9);
-    expect(getMeadowObjectives(state).find((objective) => objective.id === "first-eggs")?.state).toBe(
-      "complete",
-    );
+    expect(
+      getMeadowObjectives(state).find((objective) => objective.id === "first-eggs")?.state,
+    ).toBe("complete");
 
     state = applyMeadowAction(state, { type: "move-runner", spawnId: "rare-feed" });
     for (let index = 0; index < 3; index += 1) {
@@ -33,15 +33,15 @@ describe("meadow engine", () => {
     state = applyMeadowAction(state, { type: "claim-spawn", spawnId: "rare-feed" });
 
     expect(state.inventory.feed).toBeGreaterThanOrEqual(27);
-    expect(getMeadowObjectives(state).find((objective) => objective.id === "rare-feed")?.state).toBe(
-      "complete",
-    );
+    expect(
+      getMeadowObjectives(state).find((objective) => objective.id === "rare-feed")?.state,
+    ).toBe("complete");
 
     state = applyMeadowAction(state, { type: "sell-goods" });
 
-    expect(getMeadowObjectives(state).find((objective) => objective.id === "market-sale")?.state).toBe(
-      "complete",
-    );
+    expect(
+      getMeadowObjectives(state).find((objective) => objective.id === "market-sale")?.state,
+    ).toBe("complete");
     expect(isMeadowStabilized(state)).toBe(true);
 
     state = applyMeadowAction(state, { type: "bank-run" });
@@ -58,8 +58,8 @@ describe("meadow engine", () => {
 
     expect(state.tier).toBe(3);
     expect(state.helpers.map((helper) => helper.name)).toEqual(["Maya", "Leo"]);
-    expect(getMeadowObjectives(state).find((objective) => objective.id === "helper-tier")?.state).toBe(
-      "complete",
-    );
+    expect(
+      getMeadowObjectives(state).find((objective) => objective.id === "helper-tier")?.state,
+    ).toBe("complete");
   });
 });
